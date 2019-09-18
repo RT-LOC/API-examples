@@ -1,0 +1,15 @@
+{
+  "name": "rltoc_mqtt",
+  "version": "1.0.0",
+  "description": "MQTT demo code",
+  "main": "mqttClient.js",
+  "scripts": {
+    "start": "node mqttClient",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "RTLOC",
+  "license": "MIT",
+  "dependencies": {
+    "mqtt": "^3.0.0"
+  }
+}
