@@ -62,8 +62,6 @@ class Decoder():
                 print(" >> tag_cnt = " + str(tag_cnt))
                 i = i+1
 
-                print(" >> data_len = " + str(data_len))
-                print("\n")
                 if(tag_cnt > 0):
 
                     # Generate Tag Array
@@ -196,7 +194,6 @@ class Decoder():
                     #id, x-coord, y-coord, z-coord
                     anchorlist[t] = list(unpack('<Hhhh', data[i:i+8]))
                     i += 8
-                    anchorlist[t] = anchor_tmp
 
                 print(anchorlist)
 
