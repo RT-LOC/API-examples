@@ -25,8 +25,8 @@ from struct import *
 class Decoder():
 
     def decode(self, data):
-        (delim, package_length, type) = unpack('HHB',data[0:5])
-        # print(delim, package_length, type)
+        (delim, pkg_length, pkg_type) = unpack('HHB',data[0:5])
+        # print(delim, pkg_length, type)
 
         i = 0
         if delim == 8995:
@@ -34,7 +34,7 @@ class Decoder():
             print('\n\n')
             print('[RTLOC BINARY API]')
             
-            if type is ord('D'):
+            if pkg_type is ord('D'):
                 print(' > Data')
                 (version, data_len, msg_id, frame_nr, frame_size, time_cnt) = unpack('<BBIIHB', data[i:i+13])
                 # print(version, data_len, msg_id, frame_nr, frame_size)
@@ -54,12 +54,8 @@ class Decoder():
 
                     for tt in range(0, time_cnt):
                         #(time_source_id, time_year, time_month, time_day, time_hour, time_minute, time_second, time_millisecond, time_flag, time_spare)
-                        time_data_tmp = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-                        (time_data_tmp[0], time_data_tmp[1], time_data_tmp[2], time_data_tmp[3], time_data_tmp[4], time_data_tmp[5], time_data_tmp[6], time_data_tmp[7], time_data_tmp[8], time_data_tmp[9])  = unpack('<HBBBBBBHBH', data[i:i+13])
-                        time_data[tt] = time_data_tmp
-                        # print((time_source_id, time_year, time_month, time_day, time_hour, time_minute, time_second, time_millisecond, time_flag, time_spare))
-                        print(" >>> time: " + str(time_data_tmp[0]))
+                        time_data[tt] = list(unpack('<HBBBBBBHBH', data[i:i+13]))
+                        print(" >>> time: " + str(time_data[tt]))
                         i = i+13
 
                 (tag_cnt) = unpack('<B', data[i:i+1])[0]
@@ -76,14 +72,14 @@ class Decoder():
                         tag[x] = 0
 
                     
+                    # Loop over all tags
                     for t in range(0, tag_cnt):
                         print(" >> tag[" + str(t) + "]")
                         # tag_id, tag_offset, tag_size, tag_data, tag_quat, tag_raw_samples, tag_position, tag_userdata, tag_impulseresponse
-                        tag_tmp = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-                        (tag_tmp[0], tag_tmp[1], tag_tmp[2]) = unpack('<HHH', data[i:i+6])
-                        # print(tag_tmp[0], tag_tmp[1], tag_tmp[2])
+                        (tag_id, tag_offset, tag_size) = unpack('<HHH', data[i:i+6])
+                        tag_tmp = [tag_id, tag_offset, tag_size, 0, 0, 0, 0, 0, 0]
                         i = i+6
-                        bytes_remaining = tag_tmp[2]
+                        bytes_remaining = tag_size
 
                         while bytes_remaining > 0:
                             tag_type = unpack('<B', data[i:i+1])[0]
@@ -106,10 +102,8 @@ class Decoder():
                                     # Loop over all anchors
                                     for x in range(0, anchor_cnt):
                                         #anchor_id, anchor_dist, anchor_los1, anchor_rssi1, anchor_los2, anchor_rssi2, anchor_offset
-                                        anchor_tmp = [0, 0, 0, 0, 0, 0, 0, 0]
-                                        (anchor_tmp[0], anchor_tmp[1], anchor_tmp[2], anchor_tmp[3], anchor_tmp[4], anchor_tmp[5], anchor_tmp[6]) = unpack('<HHBBBBH', data[i:i+10])
-
-                                        anchor[x] = anchor_tmp
+                                        anchor[x] = list(unpack('<HHBBBBH', data[i:i+10]))
+    
                                         # print(anchor_tmp)
                                         i = i+10
                                         bytes_remaining -= 10                                        
@@ -119,10 +113,8 @@ class Decoder():
 
                             elif tag_type is ord('Q'):
                                 print(" >>> quaternions ")
-                                quat_tmp = [0, 0, 0, 0]
-                                (quat_tmp[0], quat_tmp[1], quat_tmp[2], quat_tmp[3]) = unpack('<ffff', data[i:i+16])
-                                # Add quat array to tag_tmp array on tag_quat element (4)
-                                tag_tmp[4] = quat_tmp
+                                tag_tmp[4] = list(unpack('<ffff', data[i:i+16]))
+
                                 # print(tag_tmp[4])
                                 i = i + 16
                                 bytes_remaining -= 16
@@ -140,25 +132,19 @@ class Decoder():
                                 print(" >>>> sample_cnt = " + str(raw_sample_cnt))
                                 if(raw_sample_cnt > 0):
                                     #ts, ax, ay, az, gx, gy, gz, mx, my, mz
-                                    raw_samples_tmp = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
                                     for z in range(0, raw_sample_cnt):
-                                        (raw_samples_tmp[0], raw_samples_tmp[1], raw_samples_tmp[2], raw_samples_tmp[3],
-                                        raw_samples_tmp[4], raw_samples_tmp[5], raw_samples_tmp[6], raw_samples_tmp[7], 
-                                        raw_samples_tmp[8], raw_samples_tmp[9])  = unpack('<Hhhhhhhhhh', data[i:i+20])
-                                        raw_samples[z] = raw_samples_tmp
-
+                                        raw_samples[z] = list(unpack('<Hhhhhhhhhh', data[i:i+20]))
                                         i = i + 20                      
                                         bytes_remaining -= 20
 
                                 # Add quat array to tag_tmp array on tag_quat element (4)
-                                tag_tmp[5] = raw_samples_tmp
+                                tag_tmp[5] = raw_samples
                                 # print(tag_tmp[5])
 
                             elif tag_type is ord('P'):
                                 print(" >>> positions ")
-                                position_tmp = [0, 0, 0]
-                                (position_tmp[0], position_tmp[1], position_tmp[2])  = unpack('<iii', data[i:i+12])
-                                tag_tmp[6] = position_tmp
+                                tag_tmp[6] = list(unpack('<iii', data[i:i+12]))
+
                                 i += 12
                                 bytes_remaining -= 12
                                 # print(" >>>> pos = [" + str(tag_tmp[6][0]) + ", " + str(tag_tmp[6][1]) + ", " + str(tag_tmp[6][2]) + "]")
@@ -187,7 +173,7 @@ class Decoder():
 
                 print("\n")
 
-            elif type is ord('A'):
+            elif pkg_type is ord('A'):
                 print(' > Anchorlist')
                 ########
                 ## Note - there is a bug in the get_anchorlist API. The anchor_cnt is not included. Hence the following workaround.
@@ -208,14 +194,13 @@ class Decoder():
 
                 for t in range(0, anchor_cnt):
                     #id, x-coord, y-coord, z-coord
-                    anchor_tmp = [0, 0, 0, 0]
-                    (anchor_tmp[0], anchor_tmp[1], anchor_tmp[2], anchor_tmp[3]) = unpack('<Hhhh', data[i:i+8])
+                    anchorlist[t] = list(unpack('<Hhhh', data[i:i+8]))
                     i += 8
                     anchorlist[t] = anchor_tmp
 
                 print(anchorlist)
 
-            elif type is ord('T'):
+            elif pkg_type is ord('T'):
                 print(' > Taglist')
                 ########
                 ## Note - there is a bug in the get_anchorlist API. The anchor_cnt is not included. Hence the following workaround.
@@ -237,15 +222,14 @@ class Decoder():
 
                 for t in range(0, tag_cnt):
                     #id, x-coord, y-coord, z-coord
-                    tag_tmp = [0, 0, 0]
-                    (tag_tmp[0], tag_tmp[1], tag_tmp[2]) = unpack('<HBh', data[i:i+5])
+                    taglist[t] = list(unpack('<HBh', data[i:i+5]))
                     i += 5
                     taglist[t] = tag_tmp
 
                 print(taglist)
 
 
-            elif type is ord('X'):
+            elif pkg_type is ord('X'):
                 print(' > Node Status')
                 (version, block_length, node_cnt) = unpack('<BBH', data[i:i+4])
                 i += 4
@@ -261,20 +245,7 @@ class Decoder():
                 
                     #node_id, node_kind, frame_off_micro, uptime, reset_reason, config_ver, tagspeed_ver, ant_dly, last_seen
                     #  last_userdata, voltage, hw_number, loader_ver, loader_crc, anchor_ver, anchor_crc, tag_ver, tag_crc, tag_subver, deca64
-                    node_stat_tmp = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]     
-                    (node_stat_tmp[0], node_stat_tmp[1], node_stat_tmp[2], node_stat_tmp[3], node_stat_tmp[4]) = unpack('<HBHIB', data[i:i+10])
-                    i += 10
-
-                    (node_stat_tmp[5], node_stat_tmp[6], node_stat_tmp[7], node_stat_tmp[8], node_stat_tmp[9]) = unpack('<HHHII', data[i:i+14])
-                    i += 14
-
-                    (node_stat_tmp[10], node_stat_tmp[11], node_stat_tmp[12], node_stat_tmp[13], node_stat_tmp[14]) = unpack('<HBHHH', data[i:i+9])
-                    i += 9
-
-                    (node_stat_tmp[15], node_stat_tmp[16], node_stat_tmp[17], node_stat_tmp[18], node_stat_tmp[19]) = unpack('<HHHBQ', data[i:i+15])
-                    i += 15
-
-                    node_stat[x] = node_stat_tmp
+                    node_stat[x] = list(unpack('<HBHIBHHHIIHBHHHHHHBQ', data[i:i+48]))
 
                 print(node_stat)
 

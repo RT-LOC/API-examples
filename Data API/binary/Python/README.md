@@ -1,5 +1,5 @@
 # Usage
-Make sure the program `cxRTLS` is running on the server. This can be on the same machine as this PC.
+Make sure the RTLOC Manager platform is running on the server. This can be on the same machine as this PC.
 ```
 python3 tcp_client.py *ip_address_of_server*
 ```
