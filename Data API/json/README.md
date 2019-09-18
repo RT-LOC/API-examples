@@ -6,6 +6,7 @@ The code can be used in Node as well as in the browser (using e.g. webpack).
 ## Getting started
 
 * (No setup prerequisites, this demo will connect with our broker)
+* `npm i`
 * Run `npm run start`
 
 ## Dependencies
