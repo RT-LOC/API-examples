@@ -11,5 +11,5 @@ This repo includes the following examples:
   + JSON api:
     - NodeJS / Browser MQTT websocket JS client
 
-* REST API (TODO)
-  + NodeJS examples
+* REST API:
+  + NodeJS / browser example
