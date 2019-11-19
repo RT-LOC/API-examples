@@ -1,5 +1,5 @@
 # API examples
-Our real-time UWB RTLS data can be accessed using different protocols (UDP, TCP, Websocket, MQTT (TCP/WSS)) and in different formats (binary/JSON).
+Real-time tag positions (from the UWB RTLS) and other sensor data can be accessed using different protocols (UDP, TCP, Websocket, MQTT (TCP/WSS)) and in different formats (binary/JSON).
 For meta data (client/project/setup configurations), we also have a REST API.
 
 This repo includes the following examples:
