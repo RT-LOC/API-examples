@@ -28,9 +28,19 @@ class ApiClient(asyncio.Protocol):
     def __init__(self, loop):
         self.loop = loop
         self.decoder = Decoder()
+        self.msg_get_anchorlist = b'##\x06\x00A\x00'
+        self.msg_get_taglist = b'##\x06\x00T\x00'
+
 
     def connection_made(self, transport):
         print('Connection made')
+        self.transport = transport
+
+        # Request Anchorlist
+        self.transport.write(self.msg_get_anchorlist)
+
+        # Request Taglist
+        self.transport.write(self.msg_get_taglist)
 
     def data_received(self, data):
         self.decoder.decode(data)
