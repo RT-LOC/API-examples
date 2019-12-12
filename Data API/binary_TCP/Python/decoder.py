@@ -211,7 +211,6 @@ class Decoder():
                 #######
 
                 print(' >> tag_cnt = ' + str(tag_cnt))
-
                 # Taglist Array
                 taglist = {}
                 for x in range(0, tag_cnt):
@@ -221,7 +220,6 @@ class Decoder():
                     #id, x-coord, y-coord, z-coord
                     taglist[t] = list(unpack('<HBh', data[i:i+5]))
                     i += 5
-                    taglist[t] = tag_tmp
 
                 print(taglist)
 
