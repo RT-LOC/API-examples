@@ -20,11 +20,13 @@ import paho.mqtt.client as mqtt
 import time
 from mqtt_decoder import Decoder
 
+print("test")
+
 # Set Parameters
 hostname = 'mqtt.cloud.rtloc.com'
-topic = 'rtls/kart/posxyz'        # NOTE: Replace with own topic
-username =  'demo:demo@rtloc.com' # NOTE: Replace with own username
-password = '12345'                # NOTE: Replace with own password
+topic = 'rtls/kart/posxyz'        # Replace with own topic
+username =  'demo:demo@rtloc.com' # Replace with own username
+password = '12345'                # Replace with own password
 port = 1883
 
 decoder = Decoder()
