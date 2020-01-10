@@ -117,7 +117,7 @@ def main(user: Dict[str, str]) -> None:
 
     id = '3c7471f1180213232c5a1231'
     client = get_client(token, id)
-    print('\n--- Client id = {}:'.format(id))
+    print('\n--- Client id = "{}":'.format(id))
     print(json.dumps(client, indent=2))
 
     users = get_users(token)

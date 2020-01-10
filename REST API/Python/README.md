@@ -8,13 +8,13 @@ This demo script connects to the API (using [requests](https://github.com/psf/re
 * [requests](https://github.com/psf/requests)
 
 ## Getting started
-* (No setup prerequisites, this demo will connect with our broker)
+`No setup prerequisites, this demo will connect with our broker`
   
-* Install the libraries with:
+* Install dependencies with:
 ```
 pip3 install -r requirements.txt
 ```
 * And then run the script:
 ```
-python3 demo.txt
+python3 demo.py
 ```
