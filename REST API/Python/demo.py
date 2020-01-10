@@ -1,5 +1,5 @@
 """Demo script for the REST API.
-Logs in using demo credentials, get the projects metadata, clients and users
+Logs in using demo credentials, get the projects, clients and users metadata
 and print them on screen.
 """
 import requests

@@ -1,6 +1,6 @@
 # Python REST API
 
-This demo script connects to the API (using [requests](https://github.com/psf/requests)), logs in (using our demo user), get the projects metadata and print them on screen.
+This demo script connects to the API (using [requests](https://github.com/psf/requests)), logs in (using our demo user), get the projects, clients and users metadata and print them on screen.
 
 ## Dependencies
 
@@ -16,5 +16,5 @@ pip3 install -r requirements.txt
 ```
 * And then run the script:
 ```
-python3 get_projects.txt
+python3 demo.txt
 ```
