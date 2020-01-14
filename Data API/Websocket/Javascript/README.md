@@ -9,4 +9,4 @@ This demo code sets up a websocket client in the browser which connects to the s
 * Open *index.html* in a modern browser (e.g. Chrome)
 * Open up the developer console (`Ctrl+Shift+I`), incoming messages will be printed out here
 
-![Console view](/console.jpg?raw=true "Console API messages")
+![Console view](/Data%20API/Websocket/Javascript/console.jpg?raw=true "Console API messages")
