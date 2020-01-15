@@ -9,7 +9,9 @@ node_modules
 # Python
 __pycache__
 *.py[cod]
+.env
 .env/*
+.python-version
 
 # Mac OS
 *.DS_Store
