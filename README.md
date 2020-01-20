@@ -5,10 +5,10 @@ For meta data (client/project/setup configurations), we also have a REST API.
 This repo includes the following examples:
 * Data API:
   + Binary API:
-    - [X] Python TCP client & parser
     - [X] C TCP client & parser
-    - [ ] NodeJS TCP client & parser (TODO)
     - [ ] C# TCP client & parser (TODO)
+    - [ ] NodeJS TCP client & parser (TODO)
+    - [X] Python TCP client & parser
   + JSON api:
     - [X] NodeJS / Browser MQTT WebSocket JS client
     - [X] Python WebSocket client
