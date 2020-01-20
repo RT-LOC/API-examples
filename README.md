@@ -8,10 +8,13 @@ This repo includes the following examples:
     - [X] Python TCP client & parser
     - [X] C TCP client & parser
     - [ ] NodeJS TCP client & parser (TODO)
+    - [ ] C# TCP client & parser (TODO)
   + JSON api:
-    - [X] NodeJS / Browser MQTT websocket JS client
+    - [X] NodeJS / Browser MQTT WebSocket JS client
+    - [X] Python WebSocket client
 
 * REST API:
   + [X] NodeJS / browser example
+  + [X] Python example
 
 If you have a preference for a parser in a different language, let us know!
