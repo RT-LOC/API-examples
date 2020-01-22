@@ -1,6 +1,6 @@
 '''
  * Copyright (c) 2018 - 2019 - RTLOC
- * 
+ *
  * This file is part of RTLOC API tools.
  *
  * RTLOC API tools is free software: you can redistribute it and/or modify
@@ -24,7 +24,7 @@ print("test")
 
 # Set Parameters
 hostname = 'mqtt.cloud.rtloc.com'
-topic = 'rtls/kart/posxyz'        # Replace with own topic
+topic = 'rtls/kart/status'        # Replace with own topic
 username =  'demo:demo@rtloc.com' # Replace with own username
 password = '12345'                # Replace with own password
 port = 1883
@@ -38,14 +38,17 @@ def on_connect(client, userdata, flags, rc):
     else:
         print(" >> Connection failed (rc= " + str(rc) + ")")
 
-def on_message(client, obj, msg):
+def on_message(client, userdata, msg):
     #msg.topic, msg.qos, msg.payload
+    print("Received message '" + str(msg.payload) + "' on topic '"
+        + msg.topic + "' with QoS " + str(msg.qos))
     decoder.decode(msg)
 
-def on_subscribe(client, obj, mid, granted_qos):
+
+def on_subscribe(client, userdata, mid, granted_qos):
     print(" >> Subscribed: " + str(mid) + " " + str(granted_qos))
 
-def on_log(client, obj, level, string):
+def on_log(client, userdata, level, string):
     print(string)
 
 mqttc = mqtt.Client()
@@ -63,7 +66,7 @@ mqttc.username_pw_set(username, password)
 mqttc.connect(hostname, port)
 
 # Subscribe (QoS level = 0)
-mqttc.subscribe(topic, 0)
+mqttc.subscribe(topic, qos=0)
 
 # Loop (exit when an error occurs)
 rc = 0
