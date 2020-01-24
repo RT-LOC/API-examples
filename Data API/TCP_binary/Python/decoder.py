@@ -173,16 +173,9 @@ class Decoder():
 
             elif pkg_type is ord('A'):
                 print(' > Anchorlist')
-                ########
-                ## Note - there is a bug in the get_anchorlist API. The anchor_cnt is not included. Hence the following workaround.
-                ## (version, anchor_cnt) = unpack('<BH', data[i:i+3])
-                ## i += 3
-                ######
-                (version) = unpack('<B', data[i:i+1])[0]
-                i += 1
-                data_length = len(data)
-                anchor_cnt =  round((data_length-6)/8)
-                #######
+                #NOTE: 24/01/2019 - version of this API updated to ver=1. Use cxRTLS40039 to use the following line, otherwise stick to version 0 (whicch doesn't have anchor_cnt)
+                (version, block_length, anchor_cnt) = unpack('<BBH', data[i:i+4])
+                i += 4
 
                 print(' >> anchor_cnt = ' + str(anchor_cnt))
                 # Anchorlist Array
@@ -199,16 +192,9 @@ class Decoder():
 
             elif pkg_type is ord('T'):
                 print(' > Taglist')
-                ########
-                ## Note - there is a bug in the get_anchorlist API. The anchor_cnt is not included. Hence the following workaround.
-                #(version, tag_cnt) = unpack('<BH', data[i:i+3])
-                #i += 3
-                ######
-                (version) = unpack('<B', data[i:i+1])[0]
-                i += 1
-                data_length = len(data)
-                tag_cnt =  round((data_length-6)/5)
-                #######
+                #NOTE: 24/01/2019 - version of this API updated to ver=1. Use cxRTLS40039 to use the following line, otherwise stick to version 0 (whicch doesn't have tag_cnt)
+                (version, block_length, tag_cnt) = unpack('<BBH', data[i:i+4])
+                i += 4
 
                 print(' >> tag_cnt = ' + str(tag_cnt))
                 # Taglist Array
