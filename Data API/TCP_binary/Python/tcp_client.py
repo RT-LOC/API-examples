@@ -55,6 +55,7 @@ ip_addr_server = str(sys.argv[1])
 param_cnt = len(sys.argv)
 
 loop = asyncio.get_event_loop()
+#NOTE: use port 13100 to connect to LIVE server, use 13200 to connect to REPLAY server.
 coro = loop.create_connection(lambda: ApiClient(loop), ip_addr_server, 13100)
 loop.run_until_complete(coro)
 loop.run_forever()
