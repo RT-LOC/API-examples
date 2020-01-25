@@ -24,10 +24,11 @@ print("test")
 
 # Set Parameters
 hostname = 'mqtt.cloud.rtloc.com'
-topic = 'rtls/kart/status'        # Replace with own topic
+topics = ('rtls/kart/status', 'rtls/kart/anchors', 'rtls/kart/posxyz')        # Replace with own topic
 username =  'demo:demo@rtloc.com' # Replace with own username
 password = '12345'                # Replace with own password
 port = 1883
+mqtt_keepalive = 50
 
 decoder = Decoder()
 
@@ -42,8 +43,11 @@ def on_message(client, userdata, msg):
     #msg.topic, msg.qos, msg.payload
     print("Received message '" + str(msg.payload) + "' on topic '"
         + msg.topic + "' with QoS " + str(msg.qos))
-    decoder.decode(msg)
-
+    # only when the topic is posxyz, decode the message
+    if msg.topic == 'rtls/kart/posxyz':
+        decoder.decode(msg)
+    else:
+        pass
 
 def on_subscribe(client, userdata, mid, granted_qos):
     print(" >> Subscribed: " + str(mid) + " " + str(granted_qos))
@@ -63,10 +67,12 @@ mqttc.on_subscribe = on_subscribe
 
 # Connect
 mqttc.username_pw_set(username, password)
-mqttc.connect(hostname, port)
+mqttc.connect(hostname, port, mqtt_keepalive)
 
+# Subscribe all topics
 # Subscribe (QoS level = 0)
-mqttc.subscribe(topic, qos=0)
+for topic in topics:
+    mqttc.subscribe(topic, qos=0)
 
 # Loop (exit when an error occurs)
 rc = 0
