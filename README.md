@@ -8,7 +8,7 @@ This repo includes the following examples:
   - Binary over TCP
     - [X] Python
     - [X] C
-    - [ ] C#
+    - [X] C#
   - JSON over Websocket
     - [X] Python
     - [X] JavaScript (browser)
