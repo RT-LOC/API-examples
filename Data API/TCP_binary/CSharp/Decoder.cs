@@ -1,59 +1,53 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 
 namespace CSharp
 {
-    public class Decoder
+    public class Decoder : IDecoder
     {
-        private IList<string> messageTypes;
-        public Decoder()
+        private readonly BinaryReader reader;
+        private uint pkgLength;
+        private uint delim;
+        private char pkgType;
+        public Decoder(BinaryReader reader)
         {
-            messageTypes = new List<string>() {
-                "D",
-                "A",
-                "T",
-                "X"
-            };
+            this.reader = reader;
         }
 
-        public (uint, uint, char, BinaryReader) Decode(BinaryReader reader)
+        public void Decode()
         {
-            var delim = reader.ReadUInt16();
-            var pkgLength = reader.ReadUInt16();
-            var pkgType = reader.ReadChar();
+            this.delim = reader.ReadUInt16();
+            this.pkgLength = reader.ReadUInt16();
+            this.pkgType = reader.ReadChar();
 
-            if (delim == 8995)
+            if (this.delim.Equals(8995))
                 Console.WriteLine(
-                    "Converted - Delim: {0}, Package Length: {1}, Package Type: {2}",
-                    delim,
-                    pkgLength,
-                    pkgType
+                    "\nConverted - Delim: {0}, Package Length: {1}, Package Type: {2}",
+                    this.delim,
+                    this.pkgLength,
+                    this.pkgType
                 );
-            return (pkgLength, delim, pkgType, reader);
+            DecodeMessageByType();
         }
 
-        public void Decode(BinaryReader reader, uint delim, char pkgType, uint bytesLength)
+        public void DecodeMessageByType()
         {
-            if (delim == 8995)
+            if (this.delim == 8995)
             {
-                switch (pkgType)
+                switch (this.pkgType)
                 {
                     case 'D':
-                        new DataDecoder().Decode(reader);
+                        new DataDecoder(this.reader).Decode();
                         break;
                     case 'A':
-                        new AnchorListDecoder().Decode(reader);
+                        new AnchorListDecoder(this.reader, this.pkgLength).Decode();
                         break;
-
                     case 'T':
-                        new TagListDecoder().Decode(reader);
+                        new TagListDecoder(this.reader, this.pkgLength).Decode();
                         break;
-
                     case 'X':
-                        new NodeStatusDecoder().Decode(reader);
+                        new NodeStatusDecoder(this.reader).Decode();
                         break;
-                        
                     default:
                         Console.WriteLine("Unknown message type!");
                         break;

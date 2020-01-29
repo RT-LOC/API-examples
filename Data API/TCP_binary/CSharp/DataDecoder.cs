@@ -5,19 +5,22 @@ namespace CSharp
 {
     public class DataDecoder : IDecoder
     {
-        public DataDecoder()
+        private readonly BinaryReader reader;
+        private ushort remainingBytes;
+        public DataDecoder(BinaryReader reader)
         {
+            this.reader = reader;
         }
 
-        public void Decode(BinaryReader reader)
+        public void Decode()
         {
             Console.WriteLine("> Data");
-            var version = reader.ReadByte();
-            var dataLen = reader.ReadByte();
-            var msgId = reader.ReadUInt32();
-            var frameNr = reader.ReadUInt32();
-            var frameSize = reader.ReadUInt16();
-            var timeCnt = reader.ReadByte();
+            var version = this.reader.ReadByte();
+            var dataLen = this.reader.ReadByte();
+            var msgId = this.reader.ReadUInt32();
+            var frameNr = this.reader.ReadUInt32();
+            var frameSize = this.reader.ReadUInt16();
+            var timeCnt = this.reader.ReadByte();
             Console.WriteLine(
                 ">> Version: {0} - Data Length: {1} - Message Id: {2} - Frame Number: {3} - Frame Size: {4}",
                 version,
@@ -28,30 +31,28 @@ namespace CSharp
             );
             Console.WriteLine(">> Time Count: {0}", timeCnt);
             if (timeCnt > 0)
-                reader = DecodeTime(reader, timeCnt);
+                DecodeTime(timeCnt);
 
-            var tagCnt = reader.ReadByte();
+            var tagCnt = this.reader.ReadByte();
             Console.WriteLine(">> Tag Count: {0}", tagCnt);
             if (tagCnt > 0)
-                DecodeTags(reader, tagCnt);
-
-            Console.WriteLine();
+                DecodeTags(tagCnt);
         }
 
-        private BinaryReader DecodeTime(BinaryReader reader, byte timeCnt)
+        private void DecodeTime(byte timeCnt)
         {
             for (int i = 0; i < timeCnt; ++i)
             {
-                var sourceId = reader.ReadUInt16();
-                var year = reader.ReadByte();
-                var month = reader.ReadByte();
-                var day = reader.ReadByte();
-                var hour = reader.ReadByte();
-                var minute = reader.ReadByte();
-                var second = reader.ReadByte();
-                var millisecond = reader.ReadUInt16();
-                var timeFlag = reader.ReadByte();
-                var spare = reader.ReadUInt16();
+                var sourceId = this.reader.ReadUInt16();
+                var year = this.reader.ReadByte();
+                var month = this.reader.ReadByte();
+                var day = this.reader.ReadByte();
+                var hour = this.reader.ReadByte();
+                var minute = this.reader.ReadByte();
+                var second = this.reader.ReadByte();
+                var millisecond = this.reader.ReadUInt16();
+                var timeFlag = this.reader.ReadByte();
+                var spare = this.reader.ReadUInt16();
 
                 string timeOutput = @">>> Time {0} -
                 Source Id: {1}
@@ -60,7 +61,7 @@ namespace CSharp
                 Spare: {10}";
                 Console.WriteLine(
                     timeOutput,
-                    i,
+                    i+1,
                     sourceId,
                     year,
                     month,
@@ -73,87 +74,94 @@ namespace CSharp
                     spare
                 );
             }
-            return reader;
         }
 
-        private void DecodeTags(BinaryReader reader, byte tagCnt)
+        private  void DecodeTags(byte tagCnt)
         {
             for (int i = 0; i < tagCnt; ++i)
             {
-                var tagId = reader.ReadUInt16();
-                var tagOffset = reader.ReadUInt16();
-                var tagSize = reader.ReadUInt16();
-                var remainingBytes = tagSize;
+                var tagId = this.reader.ReadUInt16();
+                var tagOffset = this.reader.ReadUInt16();
+                var tagSize = this.reader.ReadUInt16();
+                this.remainingBytes = tagSize;
 
                 Console.WriteLine(
                     ">>> Tag {0} - Tag Id: {1} - Tag Size: {2}",
-                    i,
+                    i+1,
                     tagId,
                     tagSize
                 );
-                while (remainingBytes > 0)
+                while (this.remainingBytes > 0)
                 {
-                    var tagType = reader.ReadByte();
-                    remainingBytes--;
+                    var tagType = this.reader.ReadByte();
+                    this.remainingBytes--;
 
                     switch (tagType)
                     {
                         case 68:
-                            remainingBytes = DecodeTagDistance(reader, remainingBytes);
+                            DecodeTagDistance();
                             break;
                         case 81:
-                            remainingBytes = DecodeQuaternions(reader, remainingBytes);
+                            DecodeQuaternions();
                             break;
                         case 82:
-                            remainingBytes = DecodeRaw(reader, remainingBytes);
+                            DecodeRaw();
                             break;
                         case 80:
-                            remainingBytes = DecodePosition(reader, remainingBytes);
+                            DecodePosition();
                             break;
                         case 85:
-                            remainingBytes = DecodeUserData(reader, remainingBytes);
+                            DecodeUserData();
                             break;
                         case 73:
-                            remainingBytes = DecodeImpulseResponse(reader, remainingBytes);
+                            DecodeImpulseResponse();
                             break;
                     }
                 }
             }
         }
 
-        private ushort DecodeTagDistance(BinaryReader reader, ushort remainingBytes)
+        private void DecodeTagDistance()
         {
-            var anchorCnt = reader.ReadByte();
+            var anchorCnt = this.reader.ReadByte();
             Console.WriteLine(">>>> Anchor Count: {0}", anchorCnt);
-            remainingBytes--;
+            this.remainingBytes--;
 
             for (int i = 0; i < anchorCnt; ++i)
             {
-                var anchorId = reader.ReadUInt16();
-                var distance = reader.ReadUInt16();
-                var los1 = reader.ReadByte();
-                var rssi1 = reader.ReadByte();
-                var los2 = reader.ReadByte();
-                var rssi2 = reader.ReadByte();
-                var anchorOffset = reader.ReadUInt16();
+                var anchorId = this.reader.ReadUInt16();
+                var distance = this.reader.ReadUInt16();
+                var los1 = this.reader.ReadByte();
+                var rssi1 = this.reader.ReadByte();
+                var los2 = this.reader.ReadByte();
+                var rssi2 = this.reader.ReadByte();
+                var anchorOffset = this.reader.ReadUInt16();
 
                 string output = @">>>> Anchor {0} -
                 Anchor Id: {1}
                 Distance: {2}
                 RSSI [{3} {4}|{5} {6}| {7}]";
-                Console.WriteLine(output, i, anchorId, distance, los1, rssi1, los2, rssi2, anchorOffset);
-                remainingBytes -= 10;
+                Console.WriteLine(
+                    output,
+                    i+1,
+                    anchorId,
+                    distance,
+                    los1,
+                    rssi1,
+                    los2,
+                    rssi2,
+                    anchorOffset
+                );
+                this.remainingBytes -= 10;
             }
-
-            return remainingBytes;
         }
 
-        private ushort DecodeQuaternions(BinaryReader reader, ushort remainingBytes)
+        private void DecodeQuaternions()
         {
-            var q0 = reader.ReadDecimal();
-            var q1 = reader.ReadDecimal();
-            var q2 = reader.ReadDecimal();
-            var q3 = reader.ReadDecimal();
+            var q0 = this.reader.ReadDecimal();
+            var q1 = this.reader.ReadDecimal();
+            var q2 = this.reader.ReadDecimal();
+            var q3 = this.reader.ReadDecimal();
 
             Console.WriteLine(
                 ">>>> Quaternions - [{}, {}, {}, {}]",
@@ -162,31 +170,31 @@ namespace CSharp
                 q2,
                 q3
             );
-            return remainingBytes -= 16;
+            this.remainingBytes -= 16;
         }
 
-        private ushort DecodeRaw(BinaryReader reader, ushort remainingBytes)
+        private void DecodeRaw()
         {
-            var sampleCnt = reader.ReadByte();
+            var sampleCnt = this.reader.ReadByte();
             Console.WriteLine(
                 ">>>> Raw Sensor Data - Sample Count: {0}",
                 sampleCnt
             );
-            remainingBytes--;
+            this.remainingBytes--;
             for (int i = 0; i < sampleCnt; ++i)
             {
-                var ts = reader.ReadUInt16();
-                var ax = reader.ReadUInt16();
-                var ay = reader.ReadUInt16();
-                var az = reader.ReadUInt16();
+                var ts = this.reader.ReadUInt16();
+                var ax = this.reader.ReadUInt16();
+                var ay = this.reader.ReadUInt16();
+                var az = this.reader.ReadUInt16();
 
-                var gx = reader.ReadUInt16();
-                var gy = reader.ReadUInt16();
-                var gz = reader.ReadUInt16();
+                var gx = this.reader.ReadUInt16();
+                var gy = this.reader.ReadUInt16();
+                var gz = this.reader.ReadUInt16();
 
-                var mx = reader.ReadUInt16();
-                var my = reader.ReadUInt16();
-                var mz = reader.ReadUInt16();
+                var mx = this.reader.ReadUInt16();
+                var my = this.reader.ReadUInt16();
+                var mz = this.reader.ReadUInt16();
 
                 Console.WriteLine(
                     ">>>> Sample {0} - [{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}]",
@@ -202,45 +210,43 @@ namespace CSharp
                     mz
                 );
 
-                remainingBytes -= 20;
+                this.remainingBytes -= 20;
             }
-
-            return remainingBytes;
         }
 
-        private ushort DecodePosition(BinaryReader reader, ushort remainingBytes)
+        private void DecodePosition()
         {
-            var x = reader.ReadUInt32();
-            var y = reader.ReadUInt32();
-            var z = reader.ReadUInt32();
+            var x = this.reader.ReadUInt32();
+            var y = this.reader.ReadUInt32();
+            var z = this.reader.ReadUInt32();
 
-            Console.WriteLine(">>>> Position - [{0}, {1}, {2}]", x, y, z);
+            Console.WriteLine(">>>> Position: [{0}, {1}, {2}]", x, y, z);
 
-            return remainingBytes -= 12;
+            this.remainingBytes -= 12;
         }
 
-        private ushort DecodeUserData(BinaryReader reader, ushort remainingBytes)
+        private void DecodeUserData()
         {
-            var count = reader.ReadByte();
+            var count = this.reader.ReadByte();
             Console.WriteLine(">>>> User Data - Count: {0}", count);
-            remainingBytes--;
+            this.remainingBytes--;
             for (int i = 0; i < count; ++i)
             {
-                Console.Write(" {0}", reader.ReadByte());
+                Console.Write(" {0}", this.reader.ReadByte());
             }
             Console.WriteLine();
-            return remainingBytes -= count;
+            this.remainingBytes -= count;
         }
 
-        private ushort DecodeImpulseResponse(BinaryReader reader, ushort remainingBytes)
+        private void DecodeImpulseResponse()
         {
-            /*var length = reader.ReadUInt16();
-            var source = reader.ReadUInt16();
-            var index = reader.ReadUInt16();
-            var left = reader.ReadByte();
-            var right = reader.ReadByte();*/
+            /*var length = this.reader.ReadUInt16();
+            var source = this.reader.ReadUInt16();
+            var index = this.reader.ReadUInt16();
+            var left = this.reader.ReadByte();
+            var right = this.reader.ReadByte();*/
             Console.WriteLine(">>>> Impulse Response - Not Implemented Yet!");
-            return 0;
+            this.remainingBytes = 0;
         }
     }
 }

@@ -5,31 +5,42 @@ namespace CSharp
 {
     public class TagListDecoder : IDecoder
     {
-        public TagListDecoder()
+        private readonly BinaryReader reader;
+        private uint bytesLength;
+        public TagListDecoder(BinaryReader reader, uint bytesLength)
         {
-
+            this.reader = reader;
+            this.bytesLength = bytesLength;
         }
 
-        /* public void Decode(Byte[] rawBytes, int bytesLength)
+        public void Decode()
         {
-            Console.WriteLine("> TagList");
-            var version = rawBytes[0];
-            var data_len = rawBytes.Length;
-            var Tag_cnt = (data_len-6)/8;
-            Console.WriteLine(
-                ">> Tag count: {0}",
-                Tag_cnt
+            Console.WriteLine("> Tag List");
+            var version = this.reader.ReadByte();
+            bytesLength--;
+            var tagCount = (int) Math.Round(
+                ((double) (bytesLength - 6) / 5),
+                MidpointRounding.AwayFromZero
             );
-            for (int i = 0; i < Tag_cnt; ++i){
-                var id = DecoderHelper.ReadUShort(rawBytes[1..3]);
-                var x_coord = DecoderHelper.ReadShort(rawBytes[3..5]);
-                var y_coord = DecoderHelper.ReadShort(rawBytes[5..7]);
-                var z_coord = DecoderHelper.ReadShort(rawBytes[7..9]);
-            }
-        } */
-        public void Decode(BinaryReader reader)
-        {
+            Console.WriteLine(">> Version: {0} - Tag Count: {1}", version, tagCount);
 
+            for (int i = 0; i < tagCount; ++i)
+            {
+                DecodeTag(i);
+            }
+        }
+
+        private void DecodeTag(int i)
+        {
+            var id = this.reader.ReadUInt16();
+            var speed = this.reader.ReadByte();
+            var z = this.reader.ReadInt16();
+            Console.WriteLine(">>> Tag {0} - Tag Id: {1} - Speed: {2} - Z-Coordinate: {3}",
+                i + 1,
+                id,
+                speed,
+                z
+            );
         }
     }   
 }

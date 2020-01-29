@@ -1,14 +1,12 @@
-﻿using System;
-
-namespace CSharp
+﻿namespace CSharp
 {
     class Program
     {
         static void Main(string[] args)
         {
-            TCP _tcp = new TCP("192.168.200.221");
-            _tcp.ConnectToServer();
-            _tcp.GetMessages();
+            TCP tcp = new TCP(args[0]);
+            tcp.ConnectToServer();
+            tcp.GetMessages();
         }
     }
 }

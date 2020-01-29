@@ -5,32 +5,45 @@ namespace CSharp
 {
     public class AnchorListDecoder : IDecoder
     {
-        public AnchorListDecoder()
+        private readonly BinaryReader reader;
+        private uint bytesLength;
+        public AnchorListDecoder(BinaryReader reader, uint bytesLength)
         {
-
+            this.reader = reader;
+            this.bytesLength = bytesLength;
         }
 
-        /* public void Decode(Byte[] rawBytes, int bytesLength)
+        public void Decode()
         {
-            Console.WriteLine("> AnchorList");
-            var version = rawBytes[0];
-            var data_len = rawBytes.Length;
-            var anchor_cnt = (data_len-6)/8;
-            Console.WriteLine(
-                ">> Anchor count: {0}",
-                anchor_cnt
+            Console.WriteLine("> Anchor List");
+            var version = this.reader.ReadByte();
+            bytesLength--;
+            var anchorCount = (int) Math.Round(
+                ((double) (bytesLength - 6) / 8),
+                MidpointRounding.AwayFromZero
             );
-            for (int i = 0; i < anchor_cnt; ++i){
-                var id = DecoderHelper.ReadUShort(rawBytes[1..3]);
-                var x_coord = DecoderHelper.ReadShort(rawBytes[3..5]);
-                var y_coord = DecoderHelper.ReadShort(rawBytes[5..7]);
-                var z_coord = DecoderHelper.ReadShort(rawBytes[7..9]);
-            }
-        } */
+            Console.WriteLine(">> Version: {0} - Anchor Count: {1}", version, anchorCount);
 
-        public void Decode(BinaryReader reader)
+            for (int i = 0; i < anchorCount; ++i)
+            {
+                DecodeAnchor(i);
+            }
+        }
+        
+        private void DecodeAnchor(int i)
         {
-            
+            var id = this.reader.ReadUInt16();
+            var x = this.reader.ReadInt16();
+            var y = this.reader.ReadInt16();
+            var z = this.reader.ReadInt16();
+
+            Console.WriteLine(">>> Anchor {0} - Anchor Id: {1} - Coordinates: [{2}, {3}, {4}]",
+                i + 1,
+                id,
+                x,
+                y,
+                z
+            );
         }
     }   
 }

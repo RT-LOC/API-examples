@@ -5,6 +5,6 @@ namespace CSharp
 {
     public interface IDecoder
     {
-        void Decode(BinaryReader reader);
+        void Decode();
     }
 }
