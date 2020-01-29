@@ -6,7 +6,6 @@ namespace CSharp
     public class Decoder : IDecoder
     {
         private readonly BinaryReader reader;
-        private uint pkgLength;
         private uint delim;
         private char pkgType;
         public Decoder(BinaryReader reader)
@@ -17,14 +16,14 @@ namespace CSharp
         public void Decode()
         {
             this.delim = reader.ReadUInt16();
-            this.pkgLength = reader.ReadUInt16();
+            var pkgLength = reader.ReadUInt16();
             this.pkgType = reader.ReadChar();
 
             if (this.delim.Equals(8995))
                 Console.WriteLine(
                     "\nConverted - Delim: {0}, Package Length: {1}, Package Type: {2}",
                     this.delim,
-                    this.pkgLength,
+                    pkgLength,
                     this.pkgType
                 );
             DecodeMessageByType();
@@ -40,10 +39,10 @@ namespace CSharp
                         new DataDecoder(this.reader).Decode();
                         break;
                     case 'A':
-                        new AnchorListDecoder(this.reader, this.pkgLength).Decode();
+                        new AnchorListDecoder(this.reader).Decode();
                         break;
                     case 'T':
-                        new TagListDecoder(this.reader, this.pkgLength).Decode();
+                        new TagListDecoder(this.reader).Decode();
                         break;
                     case 'X':
                         new NodeStatusDecoder(this.reader).Decode();

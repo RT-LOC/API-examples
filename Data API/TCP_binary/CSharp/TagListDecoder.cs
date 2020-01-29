@@ -6,22 +6,16 @@ namespace CSharp
     public class TagListDecoder : IDecoder
     {
         private readonly BinaryReader reader;
-        private uint bytesLength;
-        public TagListDecoder(BinaryReader reader, uint bytesLength)
+        public TagListDecoder(BinaryReader reader)
         {
             this.reader = reader;
-            this.bytesLength = bytesLength;
         }
 
         public void Decode()
         {
             Console.WriteLine("> Tag List");
             var version = this.reader.ReadByte();
-            bytesLength--;
-            var tagCount = (int) Math.Round(
-                ((double) (bytesLength - 6) / 5),
-                MidpointRounding.AwayFromZero
-            );
+            var tagCount = this.reader.ReadUInt16();
             Console.WriteLine(">> Version: {0} - Tag Count: {1}", version, tagCount);
 
             for (int i = 0; i < tagCount; ++i)

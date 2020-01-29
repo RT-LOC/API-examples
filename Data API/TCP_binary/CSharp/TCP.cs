@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -11,6 +12,7 @@ namespace CSharp
         private IPAddress serverIp;
         private Int32 serverPort;
         private TcpClient tcpClient;
+        private NetworkStream stream;
         public TCP(string serverIp)
         {
             this.serverIp = IPAddress.Parse(serverIp);
@@ -25,6 +27,7 @@ namespace CSharp
                 this.tcpClient = new TcpClient();
                 this.tcpClient.Connect(this.serverIp, this.serverPort);
                 Console.WriteLine("Connected!");
+                this.stream = this.tcpClient.GetStream();
             }
             catch (System.Exception ex)
             {
@@ -37,16 +40,26 @@ namespace CSharp
             }
         }
 
+        public void StreamMessage(string command)
+        {
+            command = "##xx" + command;
+            ASCIIEncoding ascEncoder = new ASCIIEncoding();
+            byte[] byteCommand = ascEncoder.GetBytes(command);
+            byte version = Convert.ToByte(0);
+            byte[] payload = new byte[byteCommand.Length + 1];
+            byteCommand.CopyTo(payload, 0);
+            payload[byteCommand.Length] = version;
+            this.stream.Write(payload, 0, payload.Length);
+        }
+
         public void GetMessages()
         {
             try
             {
                 while (true)
                 {
-                    NetworkStream stream = this.tcpClient.GetStream();
-
                     using (BinaryReader reader = new BinaryReader(
-                        stream,
+                        this.stream,
                         System.Text.Encoding.ASCII,
                         true
                     ))

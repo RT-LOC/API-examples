@@ -7,6 +7,7 @@
             TCP tcp = new TCP(args[0]);
             tcp.ConnectToServer();
             tcp.GetMessages();
+            //tcp.StreamMessage("A");
         }
     }
 }
