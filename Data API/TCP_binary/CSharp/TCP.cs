@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -42,29 +41,46 @@ namespace CSharp
 
         public void StreamMessage(string command)
         {
-            command = "##xx" + command;
             ASCIIEncoding ascEncoder = new ASCIIEncoding();
-            byte[] byteCommand = ascEncoder.GetBytes(command);
-            byte version = Convert.ToByte(0);
-            byte[] payload = new byte[byteCommand.Length + 1];
+
+            byte[] byteCommand = ascEncoder.GetBytes("##");
+            byte[] payloadLength = BitConverter.GetBytes((ushort) 6);
+            byte[] _command = ascEncoder.GetBytes(command);
+            byte version = (byte) 0;
+            var totalLength = byteCommand.Length + payloadLength.Length + _command.Length + 1;
+            byte[] payload = new byte[totalLength];
+
             byteCommand.CopyTo(payload, 0);
-            payload[byteCommand.Length] = version;
-            this.stream.Write(payload, 0, payload.Length);
+            payloadLength.CopyTo(payload, byteCommand.Length);
+            _command.CopyTo(payload, (totalLength - 2));
+            payload[--totalLength] = version;
+            using (BinaryWriter writer = new BinaryWriter(
+                this.stream,
+                System.Text.Encoding.ASCII,
+                true
+            ))
+            {
+                writer.Write(payload);
+                writer.Flush();
+            }
         }
 
         public void GetMessages()
         {
             try
             {
-                while (true)
+                using (BinaryReader reader = new BinaryReader(
+                    this.stream,
+                    System.Text.Encoding.ASCII,
+                    true
+                ))
                 {
-                    using (BinaryReader reader = new BinaryReader(
-                        this.stream,
-                        System.Text.Encoding.ASCII,
-                        true
-                    ))
+                    while (true)
                     {
-                        new Decoder(reader).Decode();
+                        if (this.stream.DataAvailable)
+                        {
+                            new Decoder(reader).Decode();
+                        }
                     }
                 }
             }

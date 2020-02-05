@@ -1,4 +1,6 @@
-﻿namespace CSharp
+﻿using System.Threading;
+
+namespace CSharp
 {
     class Program
     {
@@ -6,8 +8,12 @@
         {
             TCP tcp = new TCP(args[0]);
             tcp.ConnectToServer();
-            tcp.GetMessages();
+            Thread t = new Thread(new ThreadStart(tcp.GetMessages));
+            t.Start();
+            // To get AnchorList, uncomment the line below
             //tcp.StreamMessage("A");
+            // To get TagList, uncomment the line below
+            //tcp.StreamMessage("T");
         }
     }
 }
