@@ -216,7 +216,22 @@ class Decoder():
 
                     print(taglist)
 
+                elif pkg_type is ord('E'):
+                    print(" > External Impulse")
+                    # External Impulse Array
+                    (version, block_length, imp_type, ext_imp_frame, ext_imp_offset) = unpack('<BBBIH', data[i:i+9])
+                    i += 9
+                    #year, month, day, hour, minutes, seconds, milliseconds
+                    (ext_imp_gps_year, ext_imp_gps_month, ext_imp_gps_day, ext_imp_gps_hour, ext_imp_gps_min, ext_imp_gps_sec, ext_imp_gps_milli) = unpack('<BBBBBBH', data[i:i+8])
+                    i += 8
+                    (ext_imp_spare ) = unpack('<H', data[i:i+2])
+                    i += 2
 
+                    print(' >> type = ' + str(imp_type))
+                    print(' >> frame: ' + str(ext_imp_frame) + ", offset: " + str(ext_imp_offset))
+                    print(' >> date: ' + str(ext_imp_gps_day) + '/' + str(ext_imp_gps_month)+ '/'+ str(ext_imp_gps_year))
+                    print(' >> time: ' + str(ext_imp_gps_hour) + ":" + str(ext_imp_gps_min) + ":"+ str(ext_imp_gps_sec) + "."+ str(ext_imp_gps_milli))
+                    
                 elif pkg_type is ord('X'):
                     print(' > Node Status')
                     (version, block_length, node_cnt) = unpack('<BBH', data[i:i+4])
