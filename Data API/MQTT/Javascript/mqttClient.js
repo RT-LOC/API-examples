@@ -17,9 +17,9 @@ const mqttOptions = {
 const client = mqtt.connect('wss://mqtt.cloud.rtloc.com:8083/ws', mqttOptions)
 
 // Subscribe to a few topics
-client.subscribe('rtls/kart/status', { qos: 0 })
-client.subscribe('rtls/kart/anchors', { qos: 0 })
-client.subscribe('rtls/kart/posxyz', { qos: 0 })
+client.subscribe('rtls/replay/kart/status', { qos: 0 })
+client.subscribe('rtls/replay/kart/anchors', { qos: 0 })
+client.subscribe('rtls/replay/kart/posxyz', { qos: 0 })
 
 // On message: print topic and JSON message
 client.on('message', (topic, message) => {

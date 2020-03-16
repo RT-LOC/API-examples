@@ -24,7 +24,7 @@ print("test")
 
 # Set Parameters
 hostname = 'mqtt.cloud.rtloc.com'
-topic = 'rtls/kart/posxyz'        # Replace with own topic
+topic = 'rtls/replay/kart/posxyz'        # Replace with own topic
 username =  'demo:demo@rtloc.com' # Replace with own username
 password = '12345'                # Replace with own password
 port = 1883
