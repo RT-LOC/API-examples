@@ -24,6 +24,9 @@ Set the define *DEBUG* in the file *parser.c* accordingly:
 *DEBUG* levels goes from 0 to 3, and changes the way that the script prints data.\
 See [*DEBUG* examples](#debug-examples) for some screenshots.
 
+### Windows
+*NOTE:* if there are any issues building in **Windows**, try using [Cygwin](https://www.cygwin.com/) (with "gcc-g++" installed)
+
 # Run
 Parameter: IP-address of server.
 ```
