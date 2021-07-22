@@ -41,13 +41,13 @@ class Decoder():
                 print('\n\n')
                 print('[RTLOC BINARY API]')
                 
-                if pkg_type is ord('D'):
+                if pkg_type == ord('D'):
                     print(' > Data')
                     (version, data_len, msg_id, frame_nr, frame_size, time_cnt) = unpack('<BBIIHB', data[i:i+13])
                     # print(version, data_len, msg_id, frame_nr, frame_size)
 
                     # print(" >> version = " + str(version))
-                    if version is 3:
+                    if version == 3:
                         i = i+13
                     else:
                         i = i+12
@@ -91,7 +91,7 @@ class Decoder():
                                 bytes_remaining -= 1
                                 i = i + 1                      
 
-                                if(tag_type is ord('D')):
+                                if(tag_type == ord('D')):
                                     print(" >>> distances")
                                     anchor_cnt = unpack('<B', data[i:i+1])[0]
                                     i += 1                      
@@ -116,14 +116,14 @@ class Decoder():
                                         # Add anchor array to tag_tmp array on tag_data element (3)
                                         tag_tmp[3] = anchor
 
-                                elif tag_type is ord('Q'):
+                                elif tag_type == ord('Q'):
                                     print(" >>> quaternions ")
                                     tag_tmp[4] = list(unpack('<ffff', data[i:i+16]))
 
                                     # print(tag_tmp[4])
                                     i = i + 16
                                     bytes_remaining -= 16
-                                elif tag_type is ord('R'):
+                                elif tag_type == ord('R'):
                                     print(" >>> raw data ")
                                     raw_sample_cnt = unpack('<B', data[i:i+1])[0]
                                     i = i + 1                      
@@ -146,7 +146,7 @@ class Decoder():
                                     tag_tmp[5] = raw_samples
                                     # print(tag_tmp[5])
 
-                                elif tag_type is ord('P'):
+                                elif tag_type == ord('P'):
                                     print(" >>> positions ")
                                     tag_tmp[6] = list(unpack('<iii', data[i:i+12]))
 
@@ -154,7 +154,7 @@ class Decoder():
                                     bytes_remaining -= 12
                                     print(" >>>> pos = [" + str(tag_tmp[6][0]) + ", " + str(tag_tmp[6][1]) + ", " + str(tag_tmp[6][2]) + "]")
                                 
-                                elif tag_type is ord('U'):
+                                elif tag_type == ord('U'):
                                     #TODO: implement userdata parsing
                                     # print(" >>> userdata: ")
                                     userdata_cnt = unpack('<B', data[i:i+1])[0]
@@ -165,7 +165,7 @@ class Decoder():
                                     bytes_remaining -= userdata_cnt
                                     # tag_tmp[7] = userdata
 
-                                elif tag_type is ord('I'):
+                                elif tag_type == ord('I'):
                                     # TODO - add parsing of impulse response
                                     print(" >>> impulse response")
                                     print(" >>>> ERR - implement IR first ")
@@ -178,7 +178,7 @@ class Decoder():
 
                     # print("\n")
 
-                elif pkg_type is ord('A'):
+                elif pkg_type == ord('A'):
                     print(' > Anchorlist')
                     #NOTE: 24/01/2019 - version of this API updated to ver=1. Use cxRTLS40039 to use the following line, otherwise stick to version 0 (whicch doesn't have anchor_cnt)
                     (version, block_length, anchor_cnt) = unpack('<BBH', data[i:i+4])
@@ -197,7 +197,7 @@ class Decoder():
 
                     print(anchorlist)
 
-                elif pkg_type is ord('T'):
+                elif pkg_type == ord('T'):
                     print(' > Taglist')
                     #NOTE: 24/01/2019 - version of this API updated to ver=1. Use cxRTLS40039 to use the following line, otherwise stick to version 0 (whicch doesn't have tag_cnt)
                     (version, block_length, tag_cnt) = unpack('<BBH', data[i:i+4])
@@ -216,7 +216,7 @@ class Decoder():
 
                     print(taglist)
 
-                elif pkg_type is ord('E'):
+                elif pkg_type == ord('E'):
                     print(" > External Impulse")
                     # External Impulse Array
                     (version, block_length, imp_type, ext_imp_frame, ext_imp_offset) = unpack('<BBBIH', data[i:i+9])
@@ -232,7 +232,7 @@ class Decoder():
                     print(' >> date: ' + str(ext_imp_gps_day) + '/' + str(ext_imp_gps_month)+ '/'+ str(ext_imp_gps_year))
                     print(' >> time: ' + str(ext_imp_gps_hour) + ":" + str(ext_imp_gps_min) + ":"+ str(ext_imp_gps_sec) + "."+ str(ext_imp_gps_milli))
                     
-                elif pkg_type is ord('X'):
+                elif pkg_type == ord('X'):
                     print(' > Node Status')
                     (version, block_length, node_cnt) = unpack('<BBH', data[i:i+4])
                     i += 4
