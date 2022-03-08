@@ -4,7 +4,6 @@ This demo code connects to the RTLOC MQTT broker (using a paho-mqtt client), sub
 
 ## Getting started
 
-* (No setup prerequisites, this demo will connect with our broker)
 * `pip install paho-mqtt`
 * Run `python client.py`
 

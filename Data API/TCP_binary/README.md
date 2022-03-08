@@ -6,4 +6,4 @@ For more information about the API, check [our docs](https://docs.rtloc.com/api/
 
 ## Prerequisites
 
-For these demos you will need to have RTLOC Manager software active, and a TCP connection open.
+For these demos you will need to have RTLOC Manager software active (live or replay - change TCP port for replay), and a TCP connection open.

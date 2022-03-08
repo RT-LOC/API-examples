@@ -4,17 +4,13 @@ Real-time tag positions (from the UWB RTLS) and other sensor data can be accesse
 For meta data (client/project/setup configurations, containing for example floorplans), we also have a REST API.
 
 This repo includes the following examples:
-* Data API:
+* Local data API:
   - Binary over TCP
     - [X] Python
     - [X] C
     - [X] C#
-  - JSON over Websocket
-    - [X] Python
-    - [X] JavaScript (browser)
-  - JSON over MQTT
+  - JSON over (local) MQTT
     - [X] Python
     - [X] JavaScript (NodeJS)
-* REST API:
-  - [X] Python
-  - [X] NodeJS
+  - JSON over (local) Websocket
+    - [ ] JavaScript (browser)

@@ -18,18 +18,15 @@
 
 import paho.mqtt.client as mqtt
 import time
-from mqtt_decoder import Decoder
 
-print("test")
+import json
 
 # Set Parameters
-hostname = 'mqtt.cloud.rtloc.com'
-topic = 'rtls/replay/kart/posxyz'        # Replace with own topic
-username =  'demo:demo@rtloc.com' # Replace with own username
-password = '12345'                # Replace with own password
+hostname = 'localhost'
+username =  'demo:demo@rtloc.com' # Locally not needed.
+password = '12345'                # Locally not needed.
 port = 1883
 
-decoder = Decoder()
 
 # Define event callbacks
 def on_connect(client, userdata, flags, rc):
@@ -40,7 +37,9 @@ def on_connect(client, userdata, flags, rc):
 
 def on_message(client, obj, msg):
     #msg.topic, msg.qos, msg.payload
-    decoder.decode(msg)
+    print('Received ' + msg.topic + ' message')
+    parsed_json = (json.loads(msg.payload))
+    print(parsed_json)
 
 def on_subscribe(client, obj, mid, granted_qos):
     print(" >> Subscribed: " + str(mid) + " " + str(granted_qos))
@@ -63,7 +62,7 @@ mqttc.username_pw_set(username, password)
 mqttc.connect(hostname, port)
 
 # Subscribe (QoS level = 0)
-mqttc.subscribe(topic, 0)
+mqttc.subscribe('data/#', 0)
 
 # Loop (exit when an error occurs)
 rc = 0
