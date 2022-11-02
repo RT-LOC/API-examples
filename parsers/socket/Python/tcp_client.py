@@ -18,38 +18,47 @@
 #TODO: check for correct input parameter
 #TODO: Help information
 
+
 import asyncio
-from decoder import Decoder
+from parser.socket.Python.decoder import Decoder
 import sys
+
 
 class ApiClient(asyncio.Protocol):
     def __init__(self, loop):
         self.loop = loop
         self.decoder = Decoder()
+        self.msg_get_anchorlist = b'##\x06\x00A\x00'
+        self.msg_get_taglist = b'##\x06\x00T\x00'
+
 
     def connection_made(self, transport):
         print('Connection made')
+        self.transport = transport
 
+        # Request Anchorlist
+        self.transport.write(self.msg_get_anchorlist)
+
+        # Request Taglist
+        self.transport.write(self.msg_get_taglist)
+        print(" SENT!")
+    def data_received(self, data):
+        print(" TCP DATA RECEIVED!!")
+        self.decoder.decode(data)
     def connection_lost(self, exc):
         print('The server closed the connection')
         print('Stop the event loop')
         self.loop.stop()
 
-    def datagram_received(self, data, addr):
-        self.decoder.decode(data)
 
-async def main():
-    print("Starting UDP Client")
-    loop = asyncio.get_running_loop()
 
-    transport, protocol = await loop.create_datagram_endpoint(
-        lambda: ApiClient(loop),
-        local_addr=(my_ip_addr, 13102))
+#TODO - uncomment when using only this file
 
-    try:
-        await asyncio.sleep(3600)
-    finally:
-        transport.close()
-
-my_ip_addr = str(sys.argv[1])
-asyncio.run(main())
+# ip_addr_server = str(sys.argv[1])
+# param_cnt = len(sys.argv)
+# loop = asyncio.get_event_loop()
+# #NOTE: use port 13100 to connect to LIVE server, use 13200 to connect to REPLAY server.
+# coro = loop.create_connection(lambda: ApiClient(loop), ip_addr_server, 13200)
+# loop.run_until_complete(coro)
+# loop.run_forever()
+# loop.close()

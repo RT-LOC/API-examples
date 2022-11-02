@@ -1,0 +1,168 @@
+---
+#################################################
+# CONFIGS
+# anchor positions
+anchor_positions:
+  # Fill in all the anchor positions
+  1: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  2:
+    - 250.00
+    - 0.0
+    - 0.0
+  3:
+    - 0
+    - 250.0
+    - 0.0
+  4:
+
+  5:
+    - 1000.00
+    - 1000.00
+    - 0.0
+  101: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  102: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  103: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  104: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  105: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  106: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  107: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  109: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  110: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  111: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  112: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  122: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  123: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  124: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  125: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  126: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  127: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  128: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  201: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  202: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  204: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  205: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  206: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  208: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  209: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  210: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  211: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  212: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  213: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  214: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  8015: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate      
+#################################################
+# ENGINE FILTER OPTIONS
+
+## TODO
+# distance filtering
+dist_invalidate_delay: 3
+# smoothing can be switched off by setting to 1
+dist_smoothing_const: 0.5
+
+# position filtering
+# smoothing can be switched off by setting to 1
+pos_smoothing_const: 0.5
+
+#################################################
+# INTERFACE CONFIGS
+
+#Windows style
+serial_port: COM8
+# Unix style
+# serial_port: /dev/ttyACM0

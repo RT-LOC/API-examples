@@ -26,33 +26,34 @@ class Decoder():
 
     def decode(self, data):
         # print(delim, pkg_length, type)
-
+        tag = 0
         byte_cnt = 0
         bytes_remaining = 0
         bytes_remaining_loop = 0
         MAXDATASIZE = 8*1024 
         bufsize = len(data)
         i = 0
+        frameNr = 0
 
         while ((i + 8) < bufsize and (i + 8) < MAXDATASIZE):
             (delim, pkg_length, pkg_type) = unpack('HHB',data[i:i+5])
             if delim == 8995:
                 i += 5
-                print('\n\n')
-                print('[RTLOC BINARY API]')
+                # print('\n\n')
+                # print('[RTLOC BINARY API]')
                 
                 if pkg_type is ord('D'):
-                    print(' > Data')
+                    # print(' > Data')
                     (version, data_len, msg_id, frame_nr, frame_size, time_cnt) = unpack('<BBIIHB', data[i:i+13])
                     # print(version, data_len, msg_id, frame_nr, frame_size)
-
+                    frameNr = frame_nr
                     # print(" >> version = " + str(version))
                     if version is 3:
                         i = i+13
                     else:
                         i = i+12
 
-                    print(" >> time_cnt = " + str(time_cnt))
+                    # print(" >> time_cnt = " + str(time_cnt))
                     
                     if(time_cnt > 0):
                         time_data = {}
@@ -62,11 +63,11 @@ class Decoder():
                         for tt in range(0, time_cnt):
                             #(time_source_id, time_year, time_month, time_day, time_hour, time_minute, time_second, time_millisecond, time_flag, time_spare)
                             time_data[tt] = list(unpack('<HBBBBBBHBH', data[i:i+13]))
-                            print(" >>> time: " + str(time_data[tt]))
+                            # print(" >>> time: " + str(time_data[tt]))
                             i = i+13
 
                     (tag_cnt) = unpack('<B', data[i:i+1])[0]
-                    print(" >> tag_cnt = " + str(tag_cnt))
+                    # print(" >> tag_cnt = " + str(tag_cnt))
                     i = i+1
 
                     if(tag_cnt > 0):
@@ -79,7 +80,7 @@ class Decoder():
                         
                         # Loop over all tags
                         for t in range(0, tag_cnt):
-                            print(" >> tag[" + str(t) + "]")
+                            # print(" >> tag[" + str(t) + "]")
                             # tag_id, tag_offset, tag_size, tag_data, tag_quat, tag_raw_samples, tag_position, tag_userdata, tag_impulseresponse
                             (tag_id, tag_offset, tag_size) = unpack('<HHH', data[i:i+6])
                             tag_tmp = [tag_id, tag_offset, tag_size, 0, 0, 0, 0, 0, 0]
@@ -92,13 +93,13 @@ class Decoder():
                                 i = i + 1                      
 
                                 if(tag_type is ord('D')):
-                                    print(" >>> distances")
+                                    # print(" >>> distances")
                                     anchor_cnt = unpack('<B', data[i:i+1])[0]
                                     i += 1                      
                                     bytes_remaining -= 1
 
                                     if(anchor_cnt > 0):
-                                        print(" >>>> anchor_cnt = " + str(anchor_cnt))
+                                        # print(" >>>> anchor_cnt = " + str(anchor_cnt))
                                         # Generate Anchor Array
                                         anchor = {}
                                         for x in range(0, anchor_cnt):
@@ -147,12 +148,12 @@ class Decoder():
                                     # print(tag_tmp[5])
 
                                 elif tag_type is ord('P'):
-                                    print(" >>> positions ")
+                                    # print(" >>> positions ")
                                     tag_tmp[6] = list(unpack('<iii', data[i:i+12]))
 
                                     i += 12
                                     bytes_remaining -= 12
-                                    print(" >>>> pos = [" + str(tag_tmp[6][0]) + ", " + str(tag_tmp[6][1]) + ", " + str(tag_tmp[6][2]) + "]")
+                                    # print(" >>>> pos = [" + str(tag_tmp[6][0]) + ", " + str(tag_tmp[6][1]) + ", " + str(tag_tmp[6][2]) + "]")
                                 
                                 elif tag_type is ord('U'):
                                     #TODO: implement userdata parsing
@@ -183,7 +184,8 @@ class Decoder():
                     #NOTE: 24/01/2019 - version of this API updated to ver=1. Use cxRTLS40039 to use the following line, otherwise stick to version 0 (whicch doesn't have anchor_cnt)
                     (version, block_length, anchor_cnt) = unpack('<BBH', data[i:i+4])
                     i += 4
-
+                    print(' >> version = ' + str(version))
+                    print(' >> len = ' + str(block_length))
                     print(' >> anchor_cnt = ' + str(anchor_cnt))
                     # Anchorlist Array
                     anchorlist = {}
@@ -192,8 +194,8 @@ class Decoder():
 
                     for t in range(0, anchor_cnt):
                         #id, x-coord, y-coord, z-coord
-                        anchorlist[t] = list(unpack('<Hhhh', data[i:i+8]))
-                        i += 8
+                        anchorlist[t] = list(unpack('<Hiii', data[i:i+14]))
+                        i += 14
 
                     print(anchorlist)
 
@@ -257,3 +259,4 @@ class Decoder():
             else:
                 #Issue in the parsing, so break out of the while loop.
                 i += (MAXDATASIZE + 1)
+        return tag, frameNr
