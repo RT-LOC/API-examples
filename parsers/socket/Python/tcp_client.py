@@ -25,16 +25,16 @@ sys.path.insert(1, '../..')
 from parsers.socket.Python.decoder import Decoder
 
 
-class ApiClient(asyncio.Protocol):
+class TCPClient(asyncio.Protocol):
     def __init__(self, loop):
         self.loop = loop
         self.decoder = Decoder()
         self.msg_get_anchorlist = b'##\x06\x00A\x00'
         self.msg_get_taglist = b'##\x06\x00T\x00'
-
+        self.data = 0
 
     def connection_made(self, transport):
-        print('Connection made')
+        print(" [TCP] - connection made")
         self.transport = transport
 
         # Request Anchorlist
@@ -42,14 +42,26 @@ class ApiClient(asyncio.Protocol):
 
         # Request Taglist
         self.transport.write(self.msg_get_taglist)
-        print(" SENT!")
+        # print(" [TCP] - data sent")
+
     def data_received(self, data):
-        print(" TCP DATA RECEIVED!!")
-        self.decoder.decode(data)
+        # print(" [TCP] - data received")
+        #We assume the anchorlist follows immediately
+        anchorlist = self.decoder.decode(data)
+        
+        # Store the anchorlist
+        self.store_data(anchorlist)
+
+        # Stop the TCP connection after receiving the data (anchorlist)
+        self.loop.stop()
+
     def connection_lost(self, exc):
         print('The server closed the connection')
         print('Stop the event loop')
         self.loop.stop()
+
+    def store_data(self, data):
+        self.data = data
 
 
 

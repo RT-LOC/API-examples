@@ -26,7 +26,7 @@ class Decoder():
 
     def decode(self, data):
         # print(delim, pkg_length, type)
-        tag = 0
+        tag = None
         byte_cnt = 0
         bytes_remaining = 0
         bytes_remaining_loop = 0
@@ -34,7 +34,7 @@ class Decoder():
         bufsize = len(data)
         i = 0
         frameNr = 0
-
+        anchorlist = None
         while ((i + 8) < bufsize and (i + 8) < MAXDATASIZE):
             (delim, pkg_length, pkg_type) = unpack('HHB',data[i:i+5])
             if delim == 8995:
@@ -259,4 +259,9 @@ class Decoder():
             else:
                 #Issue in the parsing, so break out of the while loop.
                 i += (MAXDATASIZE + 1)
-        return tag, frameNr
+        if anchorlist != None:
+            return anchorlist, 1
+        if tag != None:    
+            return tag, frameNr
+        else:
+            return -1, -1

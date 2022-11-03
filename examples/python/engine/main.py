@@ -18,6 +18,8 @@ import parsers.socket.Python.tcp_client
 import parsers.socket.Python.decoder
  
 udpclient = 0
+global alist
+alist  = 0
 async def main():
     # Get the running loop
     loop = asyncio.get_running_loop()
@@ -30,13 +32,17 @@ async def main():
         lambda: udpClient,
         local_addr=("192.168.1.66", 13102))
 
-    
+    # Get the anchorlist from the received TCP data
+    if tcpClient.data != None:
+        alist = tcpClient.data[0]
+    else:
+        print(" > Need anchorlist in order to proceed")
+        return -1
+
     # Create Position Dictionary
     position_dict = {}
 
-    # Print the alist here
-    # TODO - integrate TCP data properly
-    alist = {0: [1, 1300, 1000, 0], 1: [119, 1000, 1269, 0], 2: [7904, 1000, 1000, 0]}
+    print(alist)
     for anchor in alist:
         try:
             x = alist[anchor][1]
@@ -94,7 +100,9 @@ if __name__ == "__main__":
     ####################
     #NOTE: uncommenting this will block the UDP part
     loop = asyncio.get_event_loop()
-    tcpClient = parsers.socket.Python.tcp_client.ApiClient(loop)
+    tcpClient = parsers.socket.Python.tcp_client.TCPClient(loop)
+    #NOTE: set IP address and PORT correctly
+    # > use port 13100 to connect to LIVE server, use 13200 to connect to REPLAY server.
     coro = loop.create_connection(lambda: tcpClient, "192.168.1.66", 13100)
     loop.run_until_complete(coro)
     loop.run_forever()
