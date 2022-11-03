@@ -16,7 +16,7 @@ setup(name="api_examples2",
       description="rtloc api examples",
       author="Frederic Mes @ RTLOC",
       author_email="jasper@rtloc.com",
-      packages=["parsers", "parsers.socket", "parsers.socket.Python"],
+      packages=["parsers", "parsers.uart", "parsers.uart.python", "parsers.socket", "parsers.socket.Python"],
       include_package_data=True,
       python_requires=">=3.6",
       install_requires=[])

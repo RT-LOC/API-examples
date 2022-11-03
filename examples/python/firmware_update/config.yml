@@ -1,0 +1,9 @@
+#################################################
+# INTERFACE CONFIGS
+#################################################
+
+#Windows style
+serial_port: COM5
+
+# Unix style
+# serial_port: /dev/ttyACM0

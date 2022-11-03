@@ -163,6 +163,6 @@ pos_smoothing_const: 0.5
 # INTERFACE CONFIGS
 
 #Windows style
-serial_port: COM8
+serial_port: COM5
 # Unix style
 # serial_port: /dev/ttyACM0

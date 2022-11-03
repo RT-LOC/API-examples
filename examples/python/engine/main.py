@@ -1,7 +1,7 @@
 """
     RTLOC - Integrated example of using UDP read + feeding data to the engine
 
-    udp_example.py
+    main.py
 
     (c) 2021-2022 RTLOC/Callitrix NV. All rights reserved.
 
