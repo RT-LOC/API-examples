@@ -20,8 +20,9 @@
 
 import asyncio
 # from decoder import Decoder
-import parser.socket.Python.udp_client
-from parser.socket.Python.decoder import Decoder
+import sys
+sys.path.insert(1, '../..')
+from parsers.socket.Python.decoder import Decoder
 
 import sys
 import threading

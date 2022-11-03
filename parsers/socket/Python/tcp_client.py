@@ -20,8 +20,9 @@
 
 
 import asyncio
-from parser.socket.Python.decoder import Decoder
 import sys
+sys.path.insert(1, '../..')
+from parsers.socket.Python.decoder import Decoder
 
 
 class ApiClient(asyncio.Protocol):

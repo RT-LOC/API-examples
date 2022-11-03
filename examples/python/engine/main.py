@@ -11,7 +11,8 @@
 import asyncio
 
 from engine import DebugPostionEngine, Position
-
+import sys
+sys.path.insert(1, '../../..')
 import parsers.socket.Python.udp_client
 import parsers.socket.Python.tcp_client
 import parsers.socket.Python.decoder
@@ -91,12 +92,12 @@ if __name__ == "__main__":
     ####################
     #       TCP        #
     ####################
-    # #NOTE: uncommenting this will block the UDP part
-    # loop = asyncio.get_event_loop()
-    # tcpClient = Data_API.TCP_binary.Python.tcp_client.ApiClient(loop)
-    # coro = loop.create_connection(lambda: Data_API.TCP_binary.Python.tcp_client.ApiClient(loop), "192.168.1.66", 13100)
-    # loop.run_until_complete(coro)
-    # loop.run_forever()
+    #NOTE: uncommenting this will block the UDP part
+    loop = asyncio.get_event_loop()
+    tcpClient = parsers.socket.Python.tcp_client.ApiClient(loop)
+    coro = loop.create_connection(lambda: tcpClient, "192.168.1.66", 13100)
+    loop.run_until_complete(coro)
+    loop.run_forever()
 
 
     ####################
