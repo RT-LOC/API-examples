@@ -36,7 +36,7 @@ async def main():
     if tcpClient.data != None:
         alist = tcpClient.data[0]
     else:
-        print(" > Need anchorlist in order to proceed")
+        print("[ERR] - Need anchorlist in order to proceed")
         return -1
 
     # Create Position Dictionary
@@ -98,6 +98,7 @@ if __name__ == "__main__":
     ####################
     #       TCP        #
     ####################
+    print("[TCP] - going to make tcp connection to read out anchor data")
     #NOTE: uncommenting this will block the UDP part
     loop = asyncio.get_event_loop()
     tcpClient = parsers.socket.Python.tcp_client.TCPClient(loop)
@@ -106,9 +107,11 @@ if __name__ == "__main__":
     coro = loop.create_connection(lambda: tcpClient, "192.168.1.66", 13100)
     loop.run_until_complete(coro)
     loop.run_forever()
+    print("[TCP] - all done")
 
 
     ####################
     #       UDP        #
     ####################
+    print("[UDP] - going to start UDP loop")
     asyncio.run(main())

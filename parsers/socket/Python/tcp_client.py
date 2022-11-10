@@ -27,6 +27,7 @@ from parsers.socket.Python.decoder import Decoder
 
 class TCPClient(asyncio.Protocol):
     def __init__(self, loop):
+        print("[TCP] - init client")
         self.loop = loop
         self.decoder = Decoder()
         self.msg_get_anchorlist = b'##\x06\x00A\x00'
@@ -34,7 +35,7 @@ class TCPClient(asyncio.Protocol):
         self.data = 0
 
     def connection_made(self, transport):
-        print(" [TCP] - connection made")
+        print("[TCP] - connection made")
         self.transport = transport
 
         # Request Anchorlist
@@ -56,8 +57,8 @@ class TCPClient(asyncio.Protocol):
         self.loop.stop()
 
     def connection_lost(self, exc):
-        print('The server closed the connection')
-        print('Stop the event loop')
+        print("[TCP] - The server closed the connection")
+        print("[TCP] - Stop the event loop")
         self.loop.stop()
 
     def store_data(self, data):

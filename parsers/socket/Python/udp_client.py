@@ -15,9 +15,6 @@
  *
  *  To get a copy of the GNU General Public License see <https://www.gnu.org/licenses/>.
 '''
-#TODO: check for correct input parameter
-#TODO: Help information
-
 import asyncio
 # from decoder import Decoder
 import sys
@@ -25,35 +22,10 @@ sys.path.insert(1, '../..')
 from parsers.socket.Python.decoder import Decoder
 
 import sys
-import threading
-import time
-
-# class UDPInterface():
-#     def __init__(self, config):
-#         self.port = config["serial_port"]
-
-#         self.distances_dict = {}
-#         self.data_available = False
-
-#         device_id_set = False
-#         # while not device_id_set:
-#         #     try:
-#         #         self.device_id = uart.get_distancer_internal_address(port=self.port)
-#         #         device_id_set = True
-#         #         print("Device internal address found to be {}.".format(self.device_id))
-#         #     except AssertionError:
-#         #         print("Could not read device internal address. Retrying...")
-
-#         threading.Thread(target=run_udpclient,
-#                          daemon=True)\
-#                              .start()
-
-#     def rtloc_uart_callback(self, distances_dict):
-#         self.distances_dict = distances_dict
-#         self.data_available = True
 
 class UDPClient(asyncio.Protocol):
     def __init__(self, loop):
+        print("[UDP] - init client")
         self.loop = loop
         self.decoder = Decoder()
         self.distances_dict = {}
@@ -62,11 +34,11 @@ class UDPClient(asyncio.Protocol):
 
 
     def connection_made(self, transport):
-        print('Connection made')
+        print('[UDP] - Connection made')
 
     def connection_lost(self, exc):
-        print('The server closed the connection')
-        print('Stop the event loop')
+        print("[UDP] - The server closed the connection")
+        print("[UDP] - Stop the event loop")
         self.loop.stop()
 
     def datagram_received(self, data, addr):
@@ -75,6 +47,7 @@ class UDPClient(asyncio.Protocol):
         self.distances_dict = distances_dict
         self.data_available = True
         self.frameNr = frameNr
+
     def read_data(self):
         if self.data_available == True:
             # print("DATA AVAILABLE")
