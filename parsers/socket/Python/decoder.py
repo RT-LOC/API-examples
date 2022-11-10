@@ -48,7 +48,7 @@ class Decoder():
                     # print(version, data_len, msg_id, frame_nr, frame_size)
                     frameNr = frame_nr
                     # print(" >> version = " + str(version))
-                    if version is 3:
+                    if version == 3:
                         i = i+13
                     else:
                         i = i+12
@@ -104,16 +104,14 @@ class Decoder():
                                         anchor = {}
                                         for x in range(0, anchor_cnt):
                                             anchor[x] = 0
-
                                         # Loop over all anchors
                                         for x in range(0, anchor_cnt):
                                             #anchor_id, anchor_dist, anchor_los1, anchor_rssi1, anchor_los2, anchor_rssi2, anchor_offset
                                             anchor[x] = list(unpack('<HHBBBBH', data[i:i+10]))
-        
-                                            # print(anchor_tmp)
+                                        
+                                            # print(anchor[x])
                                             i = i+10
                                             bytes_remaining -= 10                                        
-
                                         # Add anchor array to tag_tmp array on tag_data element (3)
                                         tag_tmp[3] = anchor
 
@@ -175,7 +173,6 @@ class Decoder():
 
                             tag[t] = tag_tmp            
                             # print(tag[t])
-                            # print("\n")
 
                     # print("\n")
 
