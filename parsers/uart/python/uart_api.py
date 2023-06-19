@@ -226,20 +226,37 @@ class UART(UARTInterface):
             distances = self._read_serial_packet(waiting)
             return None, None
 
+    # Changed in V4 - added rssi
     @staticmethod
     def _decode_distances(distance_data):
         distance_data = list(distance_data)
 
         # compute number of distances from data
-        nb_distances = int(len(distance_data) / 4)
+        nb_distances = int(len(distance_data) / 6)
 
         distance_dict = {}
         for idx in range(nb_distances):
-            address = distance_data[4*idx]
-            address = (distance_data[4*idx+1] << 8) + address
+            address = distance_data[6*idx]
+            address = (distance_data[6*idx+1] << 8) + address
 
-            distance = distance_data[4*idx+2]
-            distance = (distance_data[4*idx+3] << 8) + distance
+            distance = distance_data[6*idx+2]
+            distance = (distance_data[6*idx+3] << 8) + distance
+
+            rssi = distance_data[6*idx+4]
+            rssi2 = distance_data[6*idx+5]
+
+            # Take first bit of variable rssi
+            los1 = rssi >> 6
+            nlos1 = rssi >> 7
+            rssi1 = rssi & 0b00111111
+            
+            # Take last 6 bits of variable rssi
+            los2 = rssi2 >> 6
+            nlos2 = rssi2 >> 7
+            rssi2 = rssi2 & 0b00111111
+
+            # print("RSSI = " + str(rssi))
+            # print("RSSI2 = " + str(rssi2))
 
             distance_dict[address] = distance
 
