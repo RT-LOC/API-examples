@@ -45,7 +45,9 @@ class UART(UARTInterface):
         """
         Initialize serial device
         """
-        self._ser = serial.Serial('COM5', baudrate=115200,
+        # /dev/tty.usbserial-A900fu2k
+        # /dev/tty.usbmodem0000001234561
+        self._ser = serial.Serial('/dev/tty.usbmodem21401', baudrate=115200,
                             bytesize=serial.EIGHTBITS,
                             parity=serial.PARITY_NONE,
                             stopbits=serial.STOPBITS_ONE,
@@ -95,7 +97,7 @@ class UART(UARTInterface):
             # Send data out if there is any
             # print("[OUT]")
             self.uart_out()
-            time.sleep(0.1)
+            time.sleep(0.01)
             # print("[OUT DONE]")
 
             # print("[IN]")
@@ -103,12 +105,13 @@ class UART(UARTInterface):
             self.uart_in()
             # print("[IN DONE]")
 
-            time.sleep(0.1)
+            time.sleep(0.01)
 
     def uart_out(self):
         if self.get_properties == 1:
             self.get_properties = 0
             commands = self._create_header(c._SD_UART_CMD_GET_PROPS, 7, 1)
+            print(commands)
             self._write_serial_packet((commands))
 
         if self.start_distances == 1:
@@ -125,7 +128,15 @@ class UART(UARTInterface):
             self.firmwareObj.fw_update_init(c.TARGET_ADHOC, self._write_serial_packet)
             self.firmware_init = 0
 
+        # TODO: handle in a cleaner way
         elif self.firmware_req != 0:
+            # Check if self.firmwareObj is not None
+            if self.firmwareObj is None:
+                print(" >> ERR - Firmware object not set!")
+                print(" REQ = " + str(self.firmware_req))
+                self.firmware_req = 0
+                return
+            else:
             self.firmwareObj.firmware_update(c.TARGET_ADHOC, self._write_serial_packet, self.firmware_req)
             self.firmware_req = 0
 
@@ -184,7 +195,7 @@ class UART(UARTInterface):
                 print("Command == 50")
 
             elif command == c._SD_UART_CMD_DISTANCES:
-                print("Command == 2")
+                # print("Command == 2")
                 # print(len(payload))
                 dist_header = payload[0:5]
                 # print(len(dist_header))
@@ -201,6 +212,8 @@ class UART(UARTInterface):
                         # print(distances)
                         distances = self._decode_distances(distances)
                         print(distances)
+                        
+                        self.distances_dict = distances
                         # Act on the received information here, because function does not return
                         # callback(distances)
                     else: 
