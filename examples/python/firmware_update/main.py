@@ -42,7 +42,8 @@ if __name__ == "__main__":
 
     # Set firmware_init variable. This starts the firmware.
     uart.firmware_init = 1
-
+    # uart.get_properties = 1
+    # uart.start_distances = 1
     while True:
         try:
             time.sleep(0.01)
