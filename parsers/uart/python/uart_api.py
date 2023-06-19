@@ -137,8 +137,8 @@ class UART(UARTInterface):
                 self.firmware_req = 0
                 return
             else:
-            self.firmwareObj.firmware_update(c.TARGET_ADHOC, self._write_serial_packet, self.firmware_req)
-            self.firmware_req = 0
+                self.firmwareObj.firmware_update(c.TARGET_ADHOC, self._write_serial_packet, self.firmware_req)
+                self.firmware_req = 0
 
     def uart_in(self):
         waiting = self._read_serial_waiting()
@@ -267,7 +267,7 @@ class UART(UARTInterface):
             los2 = rssi2 >> 6
             nlos2 = rssi2 >> 7
             rssi2 = rssi2 & 0b00111111
-
+            
             # print("RSSI = " + str(rssi))
             # print("RSSI2 = " + str(rssi2))
 
