@@ -1,0 +1,43 @@
+#################################################
+# CONFIGS
+# anchor positions
+anchor_positions:
+  # Fill in all the anchor positions
+  4: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+  5:
+    - 250.00
+    - 0.0
+    - 0.0
+  1:
+    - 0
+    - 250.0
+    - 0.0
+
+  50363:
+    - 1000.00
+    - 1000.00
+    - 0.0
+
+#################################################
+# ENGINE FILTER OPTIONS
+
+## TODO
+# distance filtering
+dist_invalidate_delay: 3
+# smoothing can be switched off by setting to 1
+dist_smoothing_const: 0.5
+
+# position filtering
+# smoothing can be switched off by setting to 1
+pos_smoothing_const: 0.5
+
+#################################################
+# INTERFACE CONFIGS
+
+#Windows style
+# serial_port: COM9
+# Unix style
+serial_port: /dev/tty.usbmodem21401
