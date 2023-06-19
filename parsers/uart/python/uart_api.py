@@ -24,13 +24,9 @@ import serial
 import parsers.uart.python.COMMANDS as c
 from parsers.uart.python.interface import UARTInterface
 
-_DEFAULT_UART_DEV = "COM3"
-# _DEFAULT_UART_DEV = "/dev/ttyACM0"
-
 class UART(UARTInterface):
     def __init__(self, config):
         self.port = config["serial_port"]
-
         self.distances_dict = {}
         self.data_available = False
 
@@ -47,7 +43,7 @@ class UART(UARTInterface):
         """
         # /dev/tty.usbserial-A900fu2k
         # /dev/tty.usbmodem0000001234561
-        self._ser = serial.Serial('/dev/tty.usbmodem21401', baudrate=115200,
+        self._ser = serial.Serial(self.port, baudrate=115200,
                             bytesize=serial.EIGHTBITS,
                             parity=serial.PARITY_NONE,
                             stopbits=serial.STOPBITS_ONE,
@@ -66,7 +62,7 @@ class UART(UARTInterface):
     """
     Command functions
     """
-    def parse_thread(self, callback, port=_DEFAULT_UART_DEV):
+    def parse_thread(self, callback, port):
         """ Start streaming distances over uart.
 
         This function can be terminated by calling  the stop_streaming_distances function.
