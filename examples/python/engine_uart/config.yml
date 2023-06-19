@@ -1,8 +1,9 @@
 #################################################
 # CONFIGS
+
 # anchor positions
 anchor_positions:
-  # Fill in all the anchor positions
+  # Fill in all the anchor IDs and their corresponding positions
   4: 
     - 0.0 # X coordinate
     - 0.0 # Y coordinate
@@ -27,6 +28,7 @@ anchor_positions:
 ## TODO
 # distance filtering
 dist_invalidate_delay: 3
+
 # smoothing can be switched off by setting to 1
 dist_smoothing_const: 0.5
 
@@ -39,5 +41,6 @@ pos_smoothing_const: 0.5
 
 #Windows style
 # serial_port: COM9
+
 # Unix style
 serial_port: /dev/tty.usbmodem21401
