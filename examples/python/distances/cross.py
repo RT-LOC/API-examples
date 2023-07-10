@@ -36,13 +36,13 @@ sys.path.insert(1, '../../..')
 
 import parsers.socket.Python.udp_client
 import parsers.socket.Python.decoder
-from engine import DebugPostionEngine, Position
 import parsers.uart.python.uart_api as uart_api
 
 import os
 import pandas as pd  # make sure to import pandas
 import curses
 import numpy as np
+import math
 
 # Initialize curses for terminal display control
 stdscr = curses.initscr()
@@ -68,11 +68,12 @@ async def main():
         local_addr=(ip_addr_server, port))
 
     # Initialize empty DataFrame to store the data
-    df = pd.DataFrame()
-
+    
+    
     # Initialize sets to keep track of all anchors and tags
     all_anchors = set()
     all_tags = set()
+    df = pd.DataFrame(index=list(all_anchors), columns=list(all_tags), dtype=str)  
 
     while True:
         # Read out the data from the UDP client
@@ -84,15 +85,14 @@ async def main():
                 anchors = data[x][3]
                 for idx in anchors:
                     anchor_id = anchors[idx][0]
-                    distance = anchors[idx][1]
-
+                    distance = anchors[idx][1]                    
                     # Add anchor_id and tag_id to the sets
                     all_anchors.add(anchor_id)
                     all_tags.add(tag_id)
 
                     # Store the distance in the DataFrame
                     df.loc[anchor_id, tag_id] = distance
-
+                    
             # Clear the terminal screen
             stdscr.clear()
 
@@ -106,22 +106,27 @@ async def main():
                 stdscr.addstr(str(tag_id).ljust(6) + " ")  # 5 characters for the ID + 1 for space
             stdscr.attroff(curses.color_pair(1))  # turn off color pair 1
             stdscr.addstr("\n")
+            df = df.fillna("-")
 
             # Print the anchor IDs in blue and the distances in default color
             for anchor_id in df.index:
                 stdscr.attron(curses.color_pair(2))  # turn on color pair 2
                 stdscr.addstr(str(anchor_id).ljust(6))  # 5 characters for the ID + 1 for space
                 stdscr.attroff(curses.color_pair(2))  # turn off color pair 2
+                
+
                 stdscr.addstr(" ".join([str(x).ljust(6) for x in df.loc[anchor_id]]) + "\n")
 
             # Refresh the terminal screen to show the new data
             stdscr.refresh()
-
+            df = df.fillna("-")
             # Clear the DataFrame for the next iteration, but keep all rows and columns
+            
             df = pd.DataFrame(index=list(all_anchors), columns=list(all_tags))
 
+
         # Sleep for a short time to allow other tasks to run
-        await asyncio.sleep(0.01)
+        await asyncio.sleep(0.1)
 
 # Stop curses
 curses.echo()
