@@ -50,8 +50,9 @@ curses.noecho()
 curses.cbreak()
 curses.start_color()  # start color functionality
 
-curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)  # initialize a color pair for tag IDs
+curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)  # initialize a color pair for tag IDs
 curses.init_pair(2, curses.COLOR_BLUE, curses.COLOR_BLACK)  # initialize a color pair for anchors
+curses.init_pair(3, curses.COLOR_RED, curses.COLOR_BLACK)
 
 async def main():
     # Get the running loop
@@ -99,20 +100,39 @@ async def main():
             # Print the cross-table
             stdscr.addstr(0, 0, "fr = " + str(frameNr) + "\n")
 
-            # Print the tag IDs in red
-            stdscr.attron(curses.color_pair(1))  # turn on color pair 1
-            stdscr.addstr(" " * 6)  # add spaces equal to the width of anchor IDs
-            for tag_id in df.columns:
-                stdscr.addstr(str(tag_id).ljust(6) + " ")  # 5 characters for the ID + 1 for space
-            stdscr.attroff(curses.color_pair(1))  # turn off color pair 1
-            stdscr.addstr("\n")
             df = df.fillna("-")
+            
+            # Print the tag IDs in green 
+            
+            stdscr.addstr(" " * 6)  # add spaces equal to the width of anchor IDs
+
+            
+            for tag_id in df.columns:
+                # If significant amount of entries are missing, paint the tag id in red else green
+                if list(df.loc[:, tag_id]).count("-") > 5: 
+                    stdscr.attron(curses.color_pair(3))
+                    stdscr.addstr(str(tag_id).ljust(6) + " ")  # 5 characters for the ID + 1 for space
+                    stdscr.attroff(curses.color_pair(3))  # turn off color pair 1
+
+                else: 
+                    stdscr.attron(curses.color_pair(1))  # turn on color pair 1
+                    stdscr.addstr(str(tag_id).ljust(6) + " ")  # 5 characters for the ID + 1 for space
+                    stdscr.attroff(curses.color_pair(1))  # turn off color pair 1
+                
+            stdscr.addstr("\n")
 
             # Print the anchor IDs in blue and the distances in default color
             for anchor_id in df.index:
-                stdscr.attron(curses.color_pair(2))  # turn on color pair 2
-                stdscr.addstr(str(anchor_id).ljust(6))  # 5 characters for the ID + 1 for space
-                stdscr.attroff(curses.color_pair(2))  # turn off color pair 2
+                
+                # If anchor is missing significant amount of data, paints the ID in red instead
+                if list(df.loc[anchor_id]).count("-") > 5:
+                    stdscr.attron(curses.color_pair(3))
+                    stdscr.addstr(str(anchor_id).ljust(6)) 
+                    stdscr.attroff(curses.color_pair(3))                    
+                else: 
+                    stdscr.attron(curses.color_pair(2))  # turn on color pair 2
+                    stdscr.addstr(str(anchor_id).ljust(6))  # 5 characters for the ID + 1 for space
+                    stdscr.attroff(curses.color_pair(2))  # turn off color pair 2
                 
 
                 stdscr.addstr(" ".join([str(x).ljust(6) for x in df.loc[anchor_id]]) + "\n")
@@ -121,12 +141,11 @@ async def main():
             stdscr.refresh()
             df = df.fillna("-")
             # Clear the DataFrame for the next iteration, but keep all rows and columns
-            
+
             df = pd.DataFrame(index=list(all_anchors), columns=list(all_tags))
-
-
+            
         # Sleep for a short time to allow other tasks to run
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(3)
 
 # Stop curses
 curses.echo()
