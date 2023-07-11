@@ -144,7 +144,14 @@ def display_data(frameNr):
         if show_distances:
             # Print distances
             distances = [f'{x:.0f}'.ljust(6) if isinstance(x, (int, float)) else str(x).ljust(6) for x in df.loc[anchor_id]] 
-            stdscr.addstr(" ".join(distances) + "\n")
+            
+            # Minor error handling to notify if the terminal window is too small to print to (curses throws exception)
+            try: 
+                stdscr.addstr(" ".join(distances) + "\n")
+            except: 
+                os.system("clear")
+                print("Error occured during printing, try increasing window size or running main.py instead ")
+                exit()
         else:
             # Calculate and print the update rates
             update_rates = []
