@@ -28,6 +28,7 @@ class UART(UARTInterface):
     def __init__(self, config):
         self.port = config["serial_port"]
         self.distances_dict = {}
+        self.frameNr = 0
         self.data_available = False
 
         device_id_set = False
@@ -84,7 +85,7 @@ class UART(UARTInterface):
 
         commands = self._create_header(c._SD_UART_CMD_GET_PROPS, 7, 1)
 
-        print(commands)
+        # print(commands)
         # _write_serial_packet((commands))
         time.sleep(1)
 
@@ -165,7 +166,7 @@ class UART(UARTInterface):
                     print(" All OK 2 - TODO - read more & proceed instead of return!!")
                     return None, None
                 else:
-                    print("RETURN?!")
+                    # print("RETURN?!")
                     return None, None
             else:
                 if(waiting > 6):
@@ -207,9 +208,10 @@ class UART(UARTInterface):
                         # print(">> DECODE")
                         # print(distances)
                         distances = self._decode_distances(distances)
-                        print(distances)
+                        # print(distances)
                         
                         self.distances_dict = distances
+                        self.frameNr = frame
                         # Act on the received information here, because function does not return
                         # callback(distances)
                     else: 
