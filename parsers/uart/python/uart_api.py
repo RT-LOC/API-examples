@@ -50,10 +50,10 @@ class UART(UARTInterface):
                             stopbits=serial.STOPBITS_ONE,
                             timeout=2)
 
-        threading.Thread(target=self.parse_thread,
-                         args=(self.rtloc_uart_callback,), kwargs={"port": self.port},
-                         daemon=True)\
-                             .start()
+        # threading.Thread(target=self.parse_thread,
+        #                  args=(self.rtloc_uart_callback,), kwargs={"port": self.port},
+        #                  daemon=True)\
+        #                      .start()
 
     def rtloc_uart_callback(self, distances_dict):
         self.distances_dict = distances_dict
@@ -102,7 +102,7 @@ class UART(UARTInterface):
             self.uart_in()
             # print("[IN DONE]")
 
-            time.sleep(0.01)
+            time.sleep(0.04)
 
     def uart_out(self):
         if self.get_properties == 1:
