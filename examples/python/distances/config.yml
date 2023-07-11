@@ -1,0 +1,121 @@
+connection: udp
+
+udp:
+  ip_addr_server: 0.0.0.0
+  port: 13201
+
+
+#################################################
+# CONFIGS
+
+# anchor positions
+anchor_positions:
+  # Fill in all the anchor IDs and their corresponding positions
+  1:
+    - 0
+    - 250.0
+    - 0.0
+
+  2:
+    - 0
+    - 250.0
+    - 0.0
+
+  3:
+    - 0
+    - 250.0
+    - 0.0
+       
+  4:
+    - 0
+    - 250.0
+    - 0.0
+
+  5: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+
+  6:
+    - 250.00
+    - 0.0
+    - 0.0
+
+  7:
+    - 0
+    - 250.0
+    - 0.0
+
+  8:
+    - 0
+    - 250.0
+    - 0.0
+
+  9:
+    - 0
+    - 250.0
+    - 0.0
+       
+  10:
+    - 0
+    - 250.0
+    - 0.0
+
+  11: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+    
+  12:
+    - 250.00
+    - 0.0
+    - 0.0
+
+  13:
+    - 0
+    - 250.0
+    - 0.0
+
+  14: 
+    - 0.0 # X coordinate
+    - 0.0 # Y coordinate
+    - 0.0 # Z coordinate
+    
+  15:
+    - 250.00
+    - 0.0
+    - 0.0
+
+  50363:
+    - 1000.00
+    - 1000.00
+    - 0.0
+
+  3722:
+    - 0.0
+    - 0.0
+    - 0.0    
+
+
+#################################################
+# ENGINE FILTER OPTIONS
+
+## TODO
+# distance filtering
+dist_invalidate_delay: 3
+
+# smoothing can be switched off by setting to 1
+dist_smoothing_const: 0.5
+
+# position filtering
+# smoothing can be switched off by setting to 1
+pos_smoothing_const: 0.5
+
+#################################################
+# INTERFACE CONFIGS
+
+#Windows style
+# serial_port: COM9
+
+# Unix style
+serial_port: /dev/tty.usbserial-A900fu2k
