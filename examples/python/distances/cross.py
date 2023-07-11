@@ -44,9 +44,10 @@ curses.cbreak()
 curses.start_color()  # start color functionality
 stdscr.nodelay(1)  # set getch() non-blocking
 
-# Initialize color pairs for tag and anchor IDs
-curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)  # color pair for tag IDs
+# Initialize color pairs for tag, anchor IDs and missing data   
+curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)  # color pair for tag IDs
 curses.init_pair(2, curses.COLOR_BLUE, curses.COLOR_BLACK)  # color pair for anchors
+curses.init_pair(3, curses.COLOR_RED, curses.COLOR_BLACK)  # color pair for lack of data
 
 # Initialize data structures and variables
 df = pd.DataFrame()
@@ -108,23 +109,41 @@ def display_data(frameNr):
 
     stdscr.addstr("fr = " + str(frameNr) + "\n")
 
-    # Print the tag IDs in red
-    stdscr.attron(curses.color_pair(1))  # turn on color pair 1
-    stdscr.addstr(" " * 6)  # add spaces equal to the width of anchor IDs
+    # replace nan values with "-"
+    df = df.fillna("-")
+    
+    stdscr.addstr(" " * 6) # add spaces equal to the width of anchor ID
+    
+    # Print the tag IDs in green (red if missing data)
     for tag_id in df.columns:
-        stdscr.addstr(str(tag_id).ljust(6) + " ")  # 5 characters for the ID + 1 for space
-    stdscr.attroff(curses.color_pair(1))  # turn off color pair 1
+        if list(df.loc[:, tag_id]).count("-") > 7: # will print red if tag contains more than 7 nans / - 
+            stdscr.attron(curses.color_pair(3)) # turn on color pair 3 
+            stdscr.addstr(str(tag_id).ljust(6) + " ") # 5 characters for the ID + 1 for space
+            stdscr.attroff(curses.color_pair(3)) # turn off color pair 3 
+        
+        if list(df.loc[:, tag_id]).count("-") <= 7: # will print green if tag contains less than or equal 7 nans / - 
+            stdscr.attron(curses.color_pair(1)) 
+            stdscr.addstr(str(tag_id).ljust(6) + " ") # 5 characters for the ID + 1 for space
+            stdscr.attroff(curses.color_pair(1)) # turn off color pair 1 
     stdscr.addstr("\n")
-
+    
     # Print the anchor IDs in blue and either the distances or the update rates
     for anchor_id in df.index:
-        stdscr.attron(curses.color_pair(2))  # turn on color pair 2
-        stdscr.addstr(str(anchor_id).ljust(6))  # 5 characters for the ID + 1 for space
-        stdscr.attroff(curses.color_pair(2))  # turn off color pair 2
+        
+        # If anchor contains significant amount of missing data color the id in red else in blue 
+        if list(df.loc[anchor_id]).count("-") > 5:
+            stdscr.attron(curses.color_pair(3))  # turn on color pair 3
+            stdscr.addstr(str(anchor_id).ljust(6))  # 5 characters for the ID + 1 for space
+            stdscr.attroff(curses.color_pair(3))  # turn off color pair 3
+            
+        if list(df.loc[anchor_id]).count("-") <= 5:            
+            stdscr.attron(curses.color_pair(2))  # turn on color pair 2
+            stdscr.addstr(str(anchor_id).ljust(6))  # 5 characters for the ID + 1 for space
+            stdscr.attroff(curses.color_pair(2))  # turn off color pair 2
 
         if show_distances:
             # Print distances
-            distances = [f'{x:.0f}'.ljust(6) for x in df.loc[anchor_id]]
+            distances = [f'{x:.0f}'.ljust(6) if isinstance(x, (int, float)) else str(x).ljust(6) for x in df.loc[anchor_id]] 
             stdscr.addstr(" ".join(distances) + "\n")
         else:
             # Calculate and print the update rates
@@ -140,6 +159,7 @@ def display_data(frameNr):
     # Refresh the screen
     stdscr.refresh()
 
+    
     # Clear the DataFrame for next iteration, but keep all rows and columns
     df = pd.DataFrame(index=list(all_anchors), columns=list(all_tags))
     df_updates = pd.DataFrame(0, index=list(all_anchors), columns=list(all_tags))
