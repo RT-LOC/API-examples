@@ -9,7 +9,10 @@
 
 """
 import sys
-sys.path.insert(1, '../../..')
+from pathlib import Path
+
+newPath = Path(__file__).resolve().parent.parent.parent.parent
+sys.path.insert(1, str(newPath))
 
 import asyncio
 

@@ -29,8 +29,11 @@ import asyncio
 import pandas as pd
 import curses
 from collections import deque
+from pathlib import Path 
 
-sys.path.insert(1, '../../..')
+
+newPath = Path(__name__).resolve().parent.parent.parent.parent
+sys.path.insert(1, str(newPath))
 
 import parsers.socket.Python.udp_client
 import parsers.socket.Python.decoder
