@@ -1,0 +1,14 @@
+# Note that the package versions arent an exact requirement but rather a guarantee that the project works with those versions
+# To easily install these from command line run in this directory:
+# pip install -r requirements.txt  
+future==0.18.3
+iso8601==2.0.0
+numpy==1.25.1
+pandas==2.0.3
+python-dateutil==2.8.2
+pytz==2023.3
+PyYAML==6.0
+scipy==1.11.1
+serial==0.0.97
+six==1.16.0
+tzdata==2023.3
