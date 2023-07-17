@@ -2,7 +2,7 @@
 import asyncio
 import sys
 from pathlib import Path
-from PySide6.QtWidgets import (QApplication, QMainWindow, QPushButton,
+from PySide6.QtWidgets import (QApplication, QMainWindow, QPushButton, QTableWidgetItem,
                                QTextEdit, QVBoxLayout, QWidget, QHBoxLayout, QSizePolicy, QLabel, QLineEdit, QComboBox, QStackedWidget, QTableWidget)
 from PySide6.QtGui import QIcon, QTextCursor
 from qasync import QEventLoop
@@ -32,6 +32,8 @@ class MainWindow(QMainWindow):
         """Initializes state variables for connection and script running status."""
         self.running = False
         self.connected = False
+        self.tags = set()
+        self.anchors = set()
 
     def configure_window(self):
         """Configures the main window properties."""
@@ -48,6 +50,24 @@ class MainWindow(QMainWindow):
         self.display_stack.addWidget(self.text_display)
         self.display_stack.addWidget(self.table_display)
         self.display_stack.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        
+    def add_anchor(self, anchor_id):
+        if anchor_id not in self.anchors:
+            self.anchors.add(anchor_id)
+            row_position = self.table_display.rowCount()
+            self.table_display.insertRow(row_position)
+            self.table_display.setVerticalHeaderItem(row_position, QTableWidgetItem(str(anchor_id)))
+            for i in range(self.table_display.columnCount()):
+                self.table_display.setItem(row_position, i, QTableWidgetItem("-"))
+    
+    def add_tag(self, tag_id):
+        if tag_id not in self.tags:
+            self.tags.add(tag_id)              
+            colum_position = self.table_display.columnCount()
+            self.table_display.insertColumn(colum_position)
+            self.table_display.setHorizontalHeaderItem(colum_position, QTableWidgetItem(str(tag_id)))
+            for i in range(self.table_display.rowCount()):
+                self.table_display.setItem(i, colum_position, QTableWidgetItem("-"))
 
     def create_control_buttons(self):
         """Creates buttons for controlling the script."""
@@ -59,6 +79,7 @@ class MainWindow(QMainWindow):
 
         self.button_stop = QPushButton("Stop")
         self.button_stop.clicked.connect(self.stop)
+        
 
     def create_config_widgets(self):
         """Creates widgets for configuring the script."""
@@ -114,7 +135,7 @@ class MainWindow(QMainWindow):
         
     def start(self):
         # Check if all fields are filled in
-        if self.port_edit.text() == "" or self.ip_edit.text() == "" or self.current_config == "":
+        if self.port_edit.text() == "" or self.ip_edit.text() == "" or hasattr(self, "current_config") == False:
             self.log_and_print("Please fill in all fields configuration fields")
             return
         
@@ -143,10 +164,8 @@ class MainWindow(QMainWindow):
         self.udp_client.connection_lost(lambda: self.udp_client.transport)
     
     def start_script(self, config):
-        if config == "main.py":
-            asyncio.ensure_future(self.main_script())
-        else: 
-            self.log_and_print("Not implemented yet")
+        asyncio.ensure_future(self.main_script())
+
         
     async def main_script(self):
         """Run the main script."""
@@ -171,28 +190,33 @@ class MainWindow(QMainWindow):
         data, frame_nr = udp_client.read_data()
 
         if data != -1:
-            measurements = []
             self.log_and_print(f"fr = {frame_nr}")
             for x in range(len(data)):
                 self.log_and_print(f"> T {data[x][0]}: [", end="")
+                tag_id = data[x][0]
+                self.add_tag(tag_id)
                 anchors = data[x][3]
                 for idx, anchor in enumerate(anchors):
                     if idx != 0:
                         self.log_and_print(", ", end="")
-                    measurements.append(anchors[idx][1])
                     anchor_id = anchors[idx][0]
+                    distance = anchors[idx][1]
+                    self.add_anchor(anchor_id)
+                    self.table_display.setItem(list(self.anchors).index(anchor_id), list(self.tags).index(tag_id), QTableWidgetItem(str(distance)))
                     self.log_and_print(f"{anchor_id}:{anchors[idx][1]}", end="")
                 self.log_and_print("]")
+                
 
-    # TODO update to conform with cross script assumes rn that currentWidget is the text widget
+
     def log_and_print(self, message, end='\n'):
         """Log the message and print it to the console."""
-        if self.config_dropdown.currentText() == "main.py":
-            print(message, end=end)
-            self.display_stack.currentWidget().insertPlainText(message + end)
-            if self.running:
-                    self.display_stack.currentWidget().moveCursor(QTextCursor.End)
-
+        print(message, end=end)
+        self.display_stack.widget(0).insertPlainText(message + end)
+        if self.running:
+            self.display_stack.widget(0).moveCursor(QTextCursor.End)
+                    
+        
+        
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     loop = QEventLoop(app)

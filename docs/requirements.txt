@@ -12,3 +12,5 @@ scipy==1.11.1
 serial==0.0.97
 six==1.16.0
 tzdata==2023.3
+PySide6==6.2.0
+qasync==0.24.0
