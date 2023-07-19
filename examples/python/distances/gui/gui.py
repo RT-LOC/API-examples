@@ -2,7 +2,7 @@
 import asyncio
 import sys
 from pathlib import Path
-from PySide6.QtWidgets import (QApplication, QMainWindow, QPushButton, QTableWidgetItem,
+from PySide6.QtWidgets import (QApplication, QMainWindow, QPushButton, QTableWidgetItem, QMessageBox,
                                QTextEdit, QVBoxLayout, QWidget, QHBoxLayout, QSizePolicy, QLabel, QLineEdit, QComboBox, QStackedWidget, QTableWidget)
 from PySide6.QtGui import QIcon, QTextCursor
 from qasync import QEventLoop
@@ -13,6 +13,10 @@ NEW_PATH = Path(__file__).resolve().parent.parent.parent.parent.parent
 sys.path.insert(1, str(NEW_PATH))
 import parsers.socket.Python.decoder
 import parsers.socket.Python.udp_client
+
+# Change directory to the directory of this file for the icons to load properly
+import os
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 class Widget(QWidget, Ui_Widget):
@@ -70,9 +74,8 @@ class Widget(QWidget, Ui_Widget):
         
     def start(self):
         # Check if all fields are filled in
-        print("Testing")
         if self.port_line_edit.text() == "" or self.ip_line_edit.text() == "":
-            self.log_and_print("Please fill in all fields configuration fields")
+            self.show_message_box("Error", "Please fill in a IP-adress and a Port")
             return
         
         # If already connected, resume logging
@@ -86,10 +89,13 @@ class Widget(QWidget, Ui_Widget):
             self.start_script()
         self.start_button.setEnabled(False)
         self.pause_button.setEnabled(True)
+    
+    def show_message_box(self, title, message):
+        """Show a pop-up message box with a message and title."""
+        QMessageBox.warning(self, title, message)
         
     # Note that this simply stops the autoscrolling but not the logging itself
     def pause(self):
-        self.start_button.setText("Resume")
         self.start_button.setEnabled(True)
         self.pause_button.setEnabled(False)
         self.running = False
@@ -170,6 +176,7 @@ class Widget(QWidget, Ui_Widget):
         
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon("RTLOC.ico"))
     loop = QEventLoop(app)
     asyncio.set_event_loop(loop)
     window = Widget()
