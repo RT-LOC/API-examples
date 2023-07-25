@@ -1,8 +1,12 @@
-connection: udp
+connection: tcp
 
 udp:
   ip_addr_server: 0.0.0.0
   port: 13201
+
+tcp:
+  host: '127.0.0.1'
+  port: 11700
 
 
 #################################################

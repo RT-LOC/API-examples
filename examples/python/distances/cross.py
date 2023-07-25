@@ -33,6 +33,7 @@ from collections import deque
 sys.path.insert(1, '../../..')
 
 import parsers.socket.Python.udp_client
+from parsers.socket.Python.tcp_client import TCPClient
 import parsers.socket.Python.decoder
 from engine import DebugPostionEngine, Position
 import parsers.uart.python.uart_api as uart_api
@@ -86,8 +87,17 @@ def process_data(data, frameNr, tag_id=None, source=None):
         for anchor_id, distance in data.items():
             update_df(anchor_id, tag_id, distance)
         update_deque(anchor_id, tag_id, distance)
-    elif source == 'udp':
+    elif source in ['udp', 'tcp']:
         for x in range(len(data)):
+            # print(f"data: {data}")
+            # print(f"data[{x}]: {data[x]}")
+
+            if isinstance(data[x], list):
+                tag_id = data[x][0]
+            else:
+                #TODO:fm - fix this properly
+                print(f"Unexpected data type for data[{x}]: {type(data[x])}")
+                break
             tag_id = data[x][0]
             anchors = data[x][3]
             for idx in anchors:
@@ -143,6 +153,45 @@ def display_data(frameNr):
     # Clear the DataFrame for next iteration, but keep all rows and columns
     df = pd.DataFrame(index=list(all_anchors), columns=list(all_tags))
     df_updates = pd.DataFrame(0, index=list(all_anchors), columns=list(all_tags))
+
+
+async def tcp_main(config):
+    global df, df_updates, all_anchors, all_tags, start_time, total_distances, show_distances, last_update_time
+    host = '127.0.0.1'
+    # host = '169.254.68.245'
+    # host = config['tcp']['host']
+    print(host)
+    port = 11700
+    # config['tcp']['port']
+
+    loop = asyncio.get_running_loop()
+
+    tcp_client = TCPClient()
+    
+    server = await loop.create_connection(
+        lambda: tcp_client,
+        host, port)
+    
+    # while True:
+    #     await asyncio.sleep(1)  # sleep for a second
+
+
+
+
+    print(f"[TCP] - connecting to ({host}) on port {port}")
+
+    # async with server:
+    while True:
+        if tcp_client.data_available:
+            data, frameNr = tcp_client.read_data()
+            # print(frameNr)
+            process_data(data, frameNr, source='tcp')
+
+        if stdscr.getch() == ord(' '):
+            show_distances = not show_distances
+
+        await asyncio.sleep(0.01)
+
 
 
 async def udp_main(config):
@@ -207,8 +256,11 @@ if __name__ == "__main__":
         asyncio.run(udp_main(config))
     elif connection_type == 'uart':
         uart_main(config)
+    elif connection_type == 'tcp':
+        asyncio.run(tcp_main(config))
     else:
         print(f'Unsupported connection type: {connection_type}')
+
 
 # Stop curses
 curses.echo()
