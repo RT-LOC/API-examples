@@ -82,7 +82,17 @@ class Decoder():
                         for t in range(0, tag_cnt):
                             # print(" >> tag[" + str(t) + "]")
                             # tag_id, tag_offset, tag_size, tag_data, tag_quat, tag_raw_samples, tag_position, tag_userdata, tag_impulseresponse
-                            (tag_id, tag_offset, tag_size) = unpack('<HHH', data[i:i+6])
+                            # (tag_id, tag_offset, tag_size) = unpack('<HHH', data[i:i+6])
+
+                            if len(data[i:i+6]) == 6:
+                                (tag_id, tag_offset, tag_size) = unpack('<HHH', data[i:i+6])
+                            else:
+                                # TODO:fm - fix this issue
+                                # print(f"Error: Expected 6 bytes but got {len(data[i:i+6])}")
+                                break
+
+
+                            
                             tag_tmp = [tag_id, tag_offset, tag_size, 0, 0, 0, 0, 0, 0]
                             i = i+6
                             bytes_remaining = tag_size
