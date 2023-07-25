@@ -1,5 +1,5 @@
 '''
- * Copyright (c) 2018 - 2019 - RTLOC
+ * Copyright (c) 2018 - 2023 - RTLOC
  * 
  * This file is part of RTLOC API tools.
  *
@@ -15,64 +15,44 @@
  *
  *  To get a copy of the GNU General Public License see <https://www.gnu.org/licenses/>.
 '''
-#TODO: check for correct input parameter
-#TODO: Help information
-
-
 import asyncio
 import sys
+
 sys.path.insert(1, '../..')
 from parsers.socket.Python.decoder import Decoder
 
-
 class TCPClient(asyncio.Protocol):
-    def __init__(self, loop):
+    def __init__(self):
         print("[TCP] - init client")
-        self.loop = loop
         self.decoder = Decoder()
-        self.msg_get_anchorlist = b'##\x06\x00A\x00'
-        self.msg_get_taglist = b'##\x06\x00T\x00'
-        self.data = 0
+        self.distances_dict = {}
+        self.data_available = False
+        self.frameNr = 0
 
     def connection_made(self, transport):
-        print("[TCP] - connection made")
+        print('[TCP] - Connection made')
         self.transport = transport
-
-        # Request Anchorlist
-        self.transport.write(self.msg_get_anchorlist)
-
-        # Request Taglist
-        self.transport.write(self.msg_get_taglist)
-        # print(" [TCP] - data sent")
-
-    def data_received(self, data):
-        # print(" [TCP] - data received")
-        #We assume the anchorlist follows immediately
-        anchorlist = self.decoder.decode(data)
-        
-        # Store the anchorlist
-        self.store_data(anchorlist)
-
-        # Stop the TCP connection after receiving the data (anchorlist)
-        self.loop.stop()
 
     def connection_lost(self, exc):
         print("[TCP] - The server closed the connection")
-        print("[TCP] - Stop the event loop")
+        self.loop = asyncio.get_event_loop()
         self.loop.stop()
 
-    def store_data(self, data):
-        self.data = data
+    def data_received(self, data):
+        # print("D RECEIVED")
+        distances_dict, frameNr = self.decoder.decode(data)
+        self.distances_dict = distances_dict
+        self.data_available = True
+        self.frameNr = frameNr
 
+    def read_data(self):
+        if self.data_available:
+            # print("DATA AVAILABLE")
+            self.data_available = False 
+            return self.distances_dict, self.frameNr
+        else:
+            print("NOPE")
+            return -1, -1
 
-
-#TODO - uncomment when using only this file
-
-# ip_addr_server = str(sys.argv[1])
-# param_cnt = len(sys.argv)
-# loop = asyncio.get_event_loop()
-# #NOTE: use port 13100 to connect to LIVE server, use 13200 to connect to REPLAY server.
-# coro = loop.create_connection(lambda: ApiClient(loop), ip_addr_server, 13200)
-# loop.run_until_complete(coro)
-# loop.run_forever()
-# loop.close()
+        self.data_available = False 
+        return self.distances_dict, self.frameNr
