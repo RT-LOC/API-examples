@@ -25,7 +25,6 @@ from struct import *
 class Decoder():
 
     def decode(self, data):
-        # print(delim, pkg_length, type)
         tag = None
         byte_cnt = 0
         bytes_remaining = 0
@@ -37,11 +36,12 @@ class Decoder():
         anchorlist = None
         while ((i + 8) < bufsize and (i + 8) < MAXDATASIZE):
             (delim, pkg_length, pkg_type) = unpack('HHB',data[i:i+5])
+            # print(delim, pkg_length, pkg_type)
             if delim == 8995:
                 i += 5
                 # print('\n\n')
                 # print('[RTLOC BINARY API]')
-                
+
                 if pkg_type is ord('D'):
                     # print(' > Data')
                     (version, data_len, msg_id, frame_nr, frame_size, time_cnt) = unpack('<BBIIHB', data[i:i+13])
@@ -179,7 +179,7 @@ class Decoder():
                                     print(" >>> impulse response")
                                     print(" >>>> ERR - implement IR first ")
                                     # tag_tmp[8] = impulse_response
-                                    exit()
+                                    # exit()
 
                             tag[t] = tag_tmp            
                             # print(tag[t])
@@ -260,15 +260,99 @@ class Decoder():
                         node_stat[x] = list(unpack('<HBHIBHHHIIHBHHHHHHBQ', data[i:i+48]))
 
                     print(node_stat)
+                elif pkg_type == 2:
+                    # print(">>> DISTANNCE VIA UART!?!?!?!")
+                    # (version) = list(unpack('<B', data[i:i+1]))
+                    # data[i:i+1]
+                    # i = i+1
+
+                    dist_header = data[i:i+6]
+                    # print(len(dist_header))
+                    i = i + 6
+
+                    time_data = {}
+
+
+                    # print(dist_header)
+                    if(pkg_length >= 6+5):
+                        (version, nb_distances,frame) = unpack("<BBI", dist_header)
+                        # print(" VERSION = " + str(version))
+                        # print("NB DISTANCES = " + str(nb_distances))
+                        # print("FRAME = " + str(frame))
+
+                        if version == 5:
+                            #(time_status, time_year, time_month, time_day, time_hour, time_minute, time_second, time_millisecond, time_flag, time_spare)
+                            time_data[0] = list(unpack('<BBBBBBBBH', data[i:i+10]))
+                            i = i + 10
+                            # print(time_data)
+                        else:
+                            time_data = -1
+                        distances = data[i:]
+
+                        if distances is not None:
+                            # print(">> DECODE")
+                            distances = self._decode_distances(distances)
+                            # print(distances)
+                            
+                            self.distances_dict = distances
+                            self.frameNr = frame
+                            # Act on the received information here, because function does not return
+                            # callback(distances)
+                        else: 
+
+                            print(">> NONE")
+
+                        return distances, frame, time_data
+                    # else:
+                    #     return -1, -1, -1
 
                 else:
                     print('Unknown message type')
+                    return -1, -1, -1
             else:
                 #Issue in the parsing, so break out of the while loop.
                 i += (MAXDATASIZE + 1)
         if anchorlist != None:
             return anchorlist, 1
         if tag != None:    
-            return tag, frameNr
+            # print(">>>>>")
+            # print(time_data)
+            return tag, frameNr, time_data
         else:
-            return -1, -1
+            return -1, -1, -1
+
+    # Changed in V4 - added rssi
+    @staticmethod
+    def _decode_distances(distance_data):
+        distance_data = list(distance_data)
+
+        # compute number of distances from data
+        nb_distances = int(len(distance_data) / 6)
+
+        distance_dict = {}
+        for idx in range(nb_distances):
+            address = distance_data[6*idx]
+            address = (distance_data[6*idx+1] << 8) + address
+
+            distance = distance_data[6*idx+2]
+            distance = (distance_data[6*idx+3] << 8) + distance
+
+            rssi = distance_data[6*idx+4]
+            rssi2 = distance_data[6*idx+5]
+
+            # Take first bit of variable rssi
+            los1 = rssi >> 6
+            nlos1 = rssi >> 7
+            rssi1 = rssi & 0b00111111
+            
+            # Take last 6 bits of variable rssi
+            los2 = rssi2 >> 6
+            nlos2 = rssi2 >> 7
+            rssi2 = rssi2 & 0b00111111
+            
+            # print("RSSI = " + str(rssi))
+            # print("RSSI2 = " + str(rssi2))
+
+            distance_dict[address] = distance
+
+        return distance_dict
