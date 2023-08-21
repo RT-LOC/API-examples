@@ -28,6 +28,7 @@ class TCPClient(asyncio.Protocol):
         self.distances_dict = {}
         self.data_available = False
         self.frameNr = 0
+        self.time_data = {}
 
     def connection_made(self, transport):
         print('[TCP] - Connection made')
@@ -40,19 +41,21 @@ class TCPClient(asyncio.Protocol):
 
     def data_received(self, data):
         # print("D RECEIVED")
-        distances_dict, frameNr = self.decoder.decode(data)
+        distances_dict, frameNr, time_data = self.decoder.decode(data)
         self.distances_dict = distances_dict
         self.data_available = True
         self.frameNr = frameNr
+        self.time_data = time_data
+        # print(time_data)
 
     def read_data(self):
         if self.data_available:
             # print("DATA AVAILABLE")
             self.data_available = False 
-            return self.distances_dict, self.frameNr
+            return self.distances_dict, self.frameNr, self.time_data
         else:
             print("NOPE")
-            return -1, -1
+            return -1, -1, -1
 
         self.data_available = False 
-        return self.distances_dict, self.frameNr
+        return self.distances_dict, self.frameNr, self.time_data
