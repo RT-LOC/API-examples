@@ -22,7 +22,7 @@ import os
 
 class UARTInterface(ParserInterface):
     def __init__(self, config):
-        self.port = config["serial_port"]
+        self.port = config["serial"]["port"]
         self._set_serial_port(self.port)
         # self.distances_dict = {}
         # self.data_available = False

@@ -26,7 +26,8 @@ from parsers.uart.python.interface import UARTInterface
 
 class UART(UARTInterface):
     def __init__(self, config):
-        self.port = config["serial_port"]
+        self.port = config["serial"]["port"]
+
         self.distances_dict = {}
         self.frameNr = 0
         self.data_available = False

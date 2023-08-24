@@ -8,6 +8,15 @@ tcp:
   host: '127.0.0.1'
   port: 11700
 
+# INTERFACE CONFIGS
+#Windows style
+# serial_port: COM9
+
+# Unix style
+# serial_port: /dev/tty.usbserial-A900fu2k
+serial:
+  port: /dev/tty.usbmodem0007601205371
+
 
 #################################################
 # CONFIGS
@@ -116,10 +125,4 @@ dist_smoothing_const: 0.5
 pos_smoothing_const: 0.5
 
 #################################################
-# INTERFACE CONFIGS
-
-#Windows style
-# serial_port: COM9
-
-# Unix style
-serial_port: /dev/tty.usbserial-A900fu2k
+#
