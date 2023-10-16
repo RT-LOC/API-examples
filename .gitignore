@@ -589,3 +589,4 @@ __pycache__
 *.DS_Store
 
 rtloc_manager
+examples/python/distances/data
