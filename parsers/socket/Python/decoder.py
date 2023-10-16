@@ -284,7 +284,7 @@ class Decoder():
                             #(time_status, time_year, time_month, time_day, time_hour, time_minute, time_second, time_millisecond, time_flag, time_spare)
                             time_data[0] = list(unpack('<BBBBBBBBH', data[i:i+10]))
                             i = i + 10
-                            # print(time_data)
+                            print(time_data)
                         else:
                             time_data = -1
                         distances = data[i:]
@@ -316,6 +316,10 @@ class Decoder():
             return anchorlist, 1
         if tag != None:    
             # print(">>>>>")
+            # time_data = {}
+            # #check if time_data contains anything. If not, set it to an empty dictionary
+            # if not time_data:
+            #     time_data = {}
             # print(time_data)
             return tag, frameNr, time_data
         else:

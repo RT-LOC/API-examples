@@ -29,6 +29,9 @@ import asyncio
 import pandas as pd
 import curses
 from collections import deque
+import datetime
+import struct
+
 
 sys.path.insert(1, '../../..')
 
@@ -58,14 +61,79 @@ all_tags = set()
 start_time = time.time()
 show_distances = True
 last_update_time = time.time()
+df_times = pd.DataFrame()  # DataFrame to store timestamps
 
 # Initialize deques for distances and times
 distances_deque = deque(maxlen=int(10/0.01))  # distances deque (10s worth of distances)
 times_deque = deque(maxlen=int(10/0.01))  # times deque (10s worth of times)
 
+def parse_time_data(time_data):
+    """
+    Parses the time data into a readable format.
+    Returns a dictionary with source ID as keys and datetime objects as values.
+    """
+    parsed_data = {}
+    # print(time_data)
+    #Offset 0 for normal API, offset 1 for data from tag!
+    offset = 0
+
+    for source_id2, time_list in time_data.items():        
+        year = time_list[1 + offset] + 1980  # year offset
+        month = time_list[2 + offset]
+        day = time_list[3 + offset]
+        hour = time_list[4 + offset]
+        minute = time_list[5 + offset]
+        second = time_list[6 + offset]
+        ms = time_list[7 + offset] * 1000
+        source_id = time_list[0]
+
+        # Combine date and time components to form a datetime object
+        if ms > 999000:
+            print(">>>>> MS !!!!!!!!!!!!!!!!!", ms)
+            ms = 999
+            second += 1
+            if second > 59:
+                second = 0
+                minute += 1
+                if minute > 59:
+                    minute = 0
+                    hour += 1
+
+
+        # NOTE:fm - overflow of  hours still possible!
+        # Check that ms, second, minute, hour, day, month and year all fall within acceptable range
+        if not (0 <= ms <= 999999):
+            print("Warning: Milliseconds value out of range (0-999): %d" % ms)
+            ms = max(0, min(ms, 999999))
+        if not (0 <= second <= 59):
+            print("Warning: Seconds value out of range (0-59): %d" % second)
+            second = max(0, min(second, 59))
+        if not (0 <= minute <= 59):
+            print("Warning: Minutes value out of range (0-59): %d" % minute)
+            minute = max(0, min(minute, 59))
+        if not (0 <= hour <= 23):
+            print("Warning: Hours value out of range (0-23): %d" % hour)
+            hour = max(0, min(hour, 23))
+        if not (1 <= day <= 31):
+            print("Warning: Day value out of range (1-31): %d" % day)
+            day = max(1, min(day, 31))
+        if not (1 <= month <= 12):
+            print("Warning: Month value out of range (1-12): %d" % month)
+            month = max(1, min(month, 12))
+        if not (1980 <= year <= 2099):
+            print("Warning: Year value out of range (1980-2099): %d" % year)
+            year = max(1980, min(year, 2099))
+                    
+        timestamp = datetime.datetime(year, month, day, hour, minute, second, ms)
+        parsed_data[source_id] = timestamp
+        # print(f"Source ID {source_id}: {timestamp}")
+        # print(parsed_data)
+    return parsed_data
+
+
 # Function to process received data
-def process_data(data, frameNr, tag_id=None, source=None):
-    global df, df_updates, all_anchors, all_tags, start_time, total_distances, show_distances, last_update_time
+def process_data(data, frameNr, time_data=None, tag_id=None, source=None):
+    global df, df_updates, df_times, all_anchors, all_tags, start_time, total_distances, show_distances, last_update_time
 
     # Common operation for both 'uart' and 'udp'
     def update_df(anchor_id, tag_id, distance):
@@ -82,6 +150,11 @@ def process_data(data, frameNr, tag_id=None, source=None):
     def update_deque(anchor_id, tag_id, distance):
         distances_deque.append(distance)
         times_deque.append(time.time())
+
+    # Update df_times with new time data
+    if time_data is not None:
+        for source_id, timestamp in time_data.items():
+            df_times.loc[source_id, 'timestamp'] = timestamp
 
     if source == 'uart':
         for anchor_id, distance in data.items():
@@ -110,10 +183,18 @@ def process_data(data, frameNr, tag_id=None, source=None):
     elapsed_time = times_deque[-1] - times_deque[0] if times_deque else 1
     distances_per_second = len(distances_deque) / elapsed_time if elapsed_time != 0 else len(distances_deque)
     stdscr.addstr(0, 0, f"DPS = {distances_per_second:.2f}\n")
-    display_data(frameNr)
+    if config['logging']:
+        stdscr.attron(curses.color_pair(3))  # turn on color pair 3
+        stdscr.addstr("Logging is enabled\n")
+        stdscr.attroff(curses.color_pair(3))  # turn off color pair 3
+
+
+    ## ENABLE THIS TO DISPLAY DATA IN TERMINAL
+    display_data(frameNr, df_times.to_dict('index'))
+
 
 # Function to display data in terminal
-def display_data(frameNr):
+def display_data(frameNr, time_data):
     global stdscr, df, df_updates, show_distances
 
     stdscr.addstr("fr = " + str(frameNr) + "\n")
@@ -147,6 +228,14 @@ def display_data(frameNr):
 
             stdscr.addstr(" ".join(update_rates) + "\n")
 
+    # Print the timestamps for each source ID
+    stdscr.addstr("\n")
+    # print(time_data)
+    for source_id, timestamp_dict in time_data.items():
+        timestamp = timestamp_dict['timestamp']
+
+        stdscr.addstr(f"Source ID {source_id}: {timestamp}\n")
+        
     # Refresh the screen
     stdscr.refresh()
 
@@ -159,9 +248,9 @@ async def tcp_main(config):
     global df, df_updates, all_anchors, all_tags, start_time, total_distances, show_distances, last_update_time
     host = '127.0.0.1'
     # host = '169.254.68.245'
-    # host = config['tcp']['host']
+    host = config['tcp']['host']
     print(host)
-    port = 11700
+    port = 13500
     # config['tcp']['port']
 
     loop = asyncio.get_running_loop()
@@ -172,25 +261,19 @@ async def tcp_main(config):
         lambda: tcp_client,
         host, port)
     
-    # while True:
-    #     await asyncio.sleep(1)  # sleep for a second
-
-
-
-
     print(f"[TCP] - connecting to ({host}) on port {port}")
 
-    # async with server:
     while True:
         if tcp_client.data_available:
-            data, frameNr = tcp_client.read_data()
-            # print(frameNr)
-            process_data(data, frameNr, source='tcp')
+            data, frameNr, raw_time_data = tcp_client.read_data()  # Make sure the TCP client provides time data
+            parsed_time_data = parse_time_data(raw_time_data)
+            process_data(data, frameNr, parsed_time_data, source='tcp')
 
         if stdscr.getch() == ord(' '):
             show_distances = not show_distances
 
         await asyncio.sleep(0.01)
+
 
 
 
@@ -206,14 +289,69 @@ async def udp_main(config):
 
     print(f"[UDP] - connecting to ({ip_addr_server}) on port {port}")
 
+    #IPV4
     transport, protocol = await loop.create_datagram_endpoint(
         lambda: udpClient,
         local_addr=(ip_addr_server, port))
+    #IPV6
+
+    # # transport, protocol = await loop.create_datagram_endpoint(
+    # #     lambda: udpClient,
+    # #     local_addr=(ip_addr_server, port))
+
+    # transport, protocol = await loop.create_datagram_endpoint(
+    #         lambda: udpClient,
+    #         local_addr=(ip_addr_server, port),
+    #         family=socket.AF_INET6)
+
+    # group_bin = socket.inet_pton(socket.AF_INET6, "ff02::3")
+    # mreq = group_bin + struct.pack('@I', 0)
+    # # udpClient._sock.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_JOIN_GROUP, mreq)
+    # # transport.get_extra_info('socket').setsockopt(socket.IPPROTO_IPV6, socket.IPV6_JOIN_GROUP, mreq)
+    # try:
+    #     transport.get_extra_info('socket').setsockopt(socket.IPPROTO_IPV6, socket.IPV6_JOIN_GROUP, mreq)
+    # except OSError as e:
+    #     print(f"Error: {e}")
+    #     print(f"IP Address: {ip_addr_server}")
+    #     print(f"Port: {port}")
+
+
+    # Open the file
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    files = {}
 
     while True:
-        data, frameNr = udpClient.read_data()
+        data, frameNr, raw_time_data = udpClient.read_data()
         if data != -1:
-            process_data(data, frameNr, source='udp')
+            # print(raw_time_data)
+            stdscr.attron(curses.color_pair(1))  # turn on color pair 1
+            stdscr.addstr("Frame Number: " + str(frameNr) + "\n")  # print frame number in red
+            stdscr.attroff(curses.color_pair(1))  # turn off color pair 1
+            
+            if(raw_time_data != -1):
+                parsed_time_data = parse_time_data(raw_time_data)
+                # Write raw_time_data to the file
+                #Check in config.yml that the setting 'logging' is set to 'true'
+                # {0: [0, 23, 8, 23, 14, 38, 29, 173, 0, 0], 1: [4140, 23, 8, 23, 13, 58, 45, 52, 135, 169], 2: [4002, 23, 8, 23, 13, 58, 45, 52, 135, 169], 3: [3480, 23, 8, 23, 13, 58, 45, 53, 135, 169]}
+                if config['logging']:
+                                       
+                    for i in range(len(raw_time_data)):
+                        source_id = raw_time_data[i][0]
+                        # print(source_id)
+                        
+                        if source_id not in files:
+                            data_dir = 'data'
+                            if not os.path.exists(data_dir):
+                                os.makedirs(data_dir)
+                            files[source_id] = open(f'{data_dir}/raw_time_data_{timestamp}_{source_id}.txt', 'a')
+                        
+                        files[source_id].write(str(frameNr) + ", " + str(raw_time_data[i]) + '\n')
+                process_data(data, frameNr, parsed_time_data, source='udp')
+            # process_data(data, frameNr, tag_id=666, source='uart')
+
+    # #     if data != -1:
+    # #         process_data(data, frameNr, source='udp')
+
 
         if stdscr.getch() == ord(' '):
             show_distances = not show_distances

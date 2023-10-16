@@ -42,15 +42,40 @@ class UDPClient(asyncio.Protocol):
         print("[UDP] - Stop the event loop")
         self.loop.stop()
 
+    # import logging
+    # logging.basicConfig(filename='udp_client.log', level=logging.DEBUG)
+
+
     def datagram_received(self, data, addr):
+        # print(f'Length of the package: {len(data)}')
         distances_dict, frameNr, time_data = self.decoder.decode(data)
 
+        # # logging.debug(f'Received packet: {data}')
+        # # logging.debug(f'Frame Nr: {frameNr}')
+        # # logging.debug(f'Time data: {time_data}')
+        
+        # print(f'Received packet: {data}')
+        # print(f'Frame Nr: {frameNr}')
+        # print(f'Time data: {time_data}')
 
         self.distances_dict = distances_dict
         self.data_available = True
         self.frameNr = frameNr
         # return
         self.time_data = time_data
+
+        # # Print current PC time
+        import datetime
+        # print(datetime.datetime.now())
+        # print("\n\r")
+
+        # Calculate and print time difference to previous packet
+        current_time = datetime.datetime.now()
+        if hasattr(self, 'previous_time'):
+            time_difference = current_time - self.previous_time
+            # print(f'Time difference to previous packet: {time_difference}\r')
+        self.previous_time = current_time
+
         # print(time_data)
 
     def read_data(self):
