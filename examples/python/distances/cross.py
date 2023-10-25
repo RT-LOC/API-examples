@@ -173,11 +173,15 @@ def process_data(data, frameNr, time_data=None, tag_id=None, source=None):
                 break
             tag_id = data[x][0]
             anchors = data[x][3]
-            for idx in anchors:
-                anchor_id = anchors[idx][0]
-                distance = anchors[idx][1]
-                update_df(anchor_id, tag_id, distance)
-        update_deque(anchor_id, tag_id, distance)
+            if isinstance(anchors, list):
+                for idx in range(len(anchors)):
+                    anchor_id = anchors[idx][0]
+                    distance = anchors[idx][1]
+                    update_df(anchor_id, tag_id, distance)
+            # else:
+            #     print(f"Unexpected data type for anchors: {type(anchors)}")
+        if 'anchor_id' in locals() and 'tag_id' in locals() and 'distance' in locals():
+            update_deque(anchor_id, tag_id, distance)
     # Clear terminal screen and display updated data
     stdscr.clear()
     elapsed_time = times_deque[-1] - times_deque[0] if times_deque else 1
