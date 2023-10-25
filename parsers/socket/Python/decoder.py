@@ -161,7 +161,7 @@ class Decoder():
 
                                     i += 12
                                     bytes_remaining -= 12
-                                    # print(" >>>> pos = [" + str(tag_tmp[6][0]) + ", " + str(tag_tmp[6][1]) + ", " + str(tag_tmp[6][2]) + "]")
+                                    print(" >>>> " + str(tag_tmp[0]) + " -- pos = [" + str(tag_tmp[6][0]) + ", " + str(tag_tmp[6][1]) + ", " + str(tag_tmp[6][2]) + "] \r")
                                 
                                 elif tag_type is ord('U'):
                                     #TODO: implement userdata parsing
@@ -316,10 +316,10 @@ class Decoder():
             return anchorlist, 1
         if tag != None:    
             # print(">>>>>")
-            # time_data = {}
+            time_data = {}
             # #check if time_data contains anything. If not, set it to an empty dictionary
-            # if not time_data:
-            #     time_data = {}
+            if not time_data:
+                time_data = {}
             # print(time_data)
             return tag, frameNr, time_data
         else:
