@@ -130,7 +130,8 @@ def parse_time_data(time_data):
         # print(parsed_data)
     return parsed_data
 
-
+# Place this at the global scope of your script
+log_files = {}
 # Function to process received data
 def process_data(data, frameNr, time_data=None, tag_id=None, source=None):
     global df, df_updates, df_times, all_anchors, all_tags, start_time, total_distances, show_distances, last_update_time
@@ -173,28 +174,56 @@ def process_data(data, frameNr, time_data=None, tag_id=None, source=None):
                 break
             tag_id = data[x][0]
             anchors = data[x][3]
-            if isinstance(anchors, list):
+
+
+            # Check if logging_distances is enabled
+            if config['logging_distances']:
+                # Check if the log file for this tag_id already exists
+                if tag_id not in log_files:
+                    # Generate a timestamp for the filename only when creating a new file
+                    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+                    log_files[tag_id] = open(f'distances_{tag_id}_{timestamp}.log', 'a')
+                
+                # Get the log file from the dictionary
+                distance_log_file = log_files[tag_id]
+                # Write the frame number
+                distance_log_file.write(f"{frameNr}")
+                anchors = data[x][3]
                 for idx in range(len(anchors)):
                     anchor_id = anchors[idx][0]
                     distance = anchors[idx][1]
-                    update_df(anchor_id, tag_id, distance)
+                    # Write anchor ID and distance
+                    distance_log_file.write(f", {anchor_id}, {distance}")
+                # End the line for this frame
+                distance_log_file.write("\n")
+
+
+            # if config['logging_distances']:
+            #     distance_log_file = open(f'distances_{tag_id}.log', 'a')
+            for idx in range(len(anchors)):
+                anchor_id = anchors[idx][0]
+                distance = anchors[idx][1]
+                # if config['logging_distances']:
+                #     distance_log_file.write(f"{tag_id}, {anchor_id}, {distance}\n")
+                update_df(anchor_id, tag_id, distance)
+            # if config['logging_distances']:
+            #     distance_log_file.close()
             # else:
             #     print(f"Unexpected data type for anchors: {type(anchors)}")
-        if 'anchor_id' in locals() and 'tag_id' in locals() and 'distance' in locals():
-            update_deque(anchor_id, tag_id, distance)
+        # if 'anchor_id' in locals() and 'tag_id' in locals() and 'distance' in locals():
+        #     update_deque(anchor_id, tag_id, distance)
     # Clear terminal screen and display updated data
-    stdscr.clear()
-    elapsed_time = times_deque[-1] - times_deque[0] if times_deque else 1
-    distances_per_second = len(distances_deque) / elapsed_time if elapsed_time != 0 else len(distances_deque)
-    stdscr.addstr(0, 0, f"DPS = {distances_per_second:.2f}\n")
-    if config['logging']:
-        stdscr.attron(curses.color_pair(3))  # turn on color pair 3
-        stdscr.addstr("Logging is enabled\n")
-        stdscr.attroff(curses.color_pair(3))  # turn off color pair 3
-
+    # stdscr.clear()
+    # elapsed_time = times_deque[-1] - times_deque[0] if times_deque else 1
+    # distances_per_second = len(distances_deque) / elapsed_time if elapsed_time != 0 else len(distances_deque)
+    # stdscr.addstr(0, 0, f"DPS = {distances_per_second:.2f}\n")
+    # if config['logging']:
+    #     stdscr.attron(curses.color_pair(3))  # turn on color pair 3
+    #     stdscr.addstr("Logging is enabled\n")
+    #     stdscr.attroff(curses.color_pair(3))  # turn off color pair 3
 
     ## ENABLE THIS TO DISPLAY DATA IN TERMINAL
-    display_data(frameNr, df_times.to_dict('index'))
+    # display_data(frameNr, df_times.to_dict('index'))
 
 
 # Function to display data in terminal
@@ -210,9 +239,13 @@ def display_data(frameNr, time_data):
         stdscr.addstr(str(tag_id).ljust(6) + " ")  # 5 characters for the ID + 1 for space
     stdscr.attroff(curses.color_pair(1))  # turn off color pair 1
     stdscr.addstr("\n")
-
+    
     # Print the anchor IDs in blue and either the distances or the update rates
+    # stdscr.addstr("fr = " + str(df.index) + "\n")
+
     for anchor_id in df.index:
+        # stdscr.addstr("id = " + str(anchor_id) + "\n")
+
         stdscr.attron(curses.color_pair(2))  # turn on color pair 2
         stdscr.addstr(str(anchor_id).ljust(6))  # 5 characters for the ID + 1 for space
         stdscr.attroff(curses.color_pair(2))  # turn off color pair 2
@@ -250,11 +283,11 @@ def display_data(frameNr, time_data):
 
 async def tcp_main(config):
     global df, df_updates, all_anchors, all_tags, start_time, total_distances, show_distances, last_update_time
-    host = '127.0.0.1'
+    host = '10.0.1.158'
     # host = '169.254.68.245'
     host = config['tcp']['host']
     print(host)
-    port = 13500
+    port = 13200
     # config['tcp']['port']
 
     loop = asyncio.get_running_loop()
@@ -328,9 +361,9 @@ async def udp_main(config):
         data, frameNr, raw_time_data = udpClient.read_data()
         if data != -1:
             # print(raw_time_data)
-            stdscr.attron(curses.color_pair(1))  # turn on color pair 1
-            stdscr.addstr("Frame Number: " + str(frameNr) + "\n")  # print frame number in red
-            stdscr.attroff(curses.color_pair(1))  # turn off color pair 1
+            # stdscr.attron(curses.color_pair(1))  # turn on color pair 1
+            # stdscr.addstr("\r\nFrame Number: " + str(frameNr) + "\n")  # print frame number in red
+            # stdscr.attroff(curses.color_pair(1))  # turn off color pair 1
             
             if(raw_time_data != -1):
                 parsed_time_data = parse_time_data(raw_time_data)
@@ -338,12 +371,13 @@ async def udp_main(config):
                 #Check in config.yml that the setting 'logging' is set to 'true'
                 # {0: [0, 23, 8, 23, 14, 38, 29, 173, 0, 0], 1: [4140, 23, 8, 23, 13, 58, 45, 52, 135, 169], 2: [4002, 23, 8, 23, 13, 58, 45, 52, 135, 169], 3: [3480, 23, 8, 23, 13, 58, 45, 53, 135, 169]}
                 if config['logging']:
-                                       
+                    print("LOGGING1\n")
                     for i in range(len(raw_time_data)):
                         source_id = raw_time_data[i][0]
-                        # print(source_id)
+                        print(source_id)
                         
                         if source_id not in files:
+                            print("LOGGING2\n")
                             data_dir = 'data'
                             if not os.path.exists(data_dir):
                                 os.makedirs(data_dir)
